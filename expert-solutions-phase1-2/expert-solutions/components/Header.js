@@ -6,9 +6,9 @@ import siteConfig from '@/lib/config';
 import ClickToCall from './ClickToCall';
 
 const NAV_LINKS = [
-  { href: '/business-electricity', label: 'Business Electricity' },
-  { href: '/business-gas', label: 'Business Gas' },
   { href: '/business-energy-comparison', label: 'Compare Business Energy' },
+  { href: '/sectors', label: 'By Sector' },
+  { href: '/locations', label: 'By Location' },
   { href: '/business-energy-renewal', label: 'Renewals' },
   { href: '/contact-us', label: 'Contact' },
 ];

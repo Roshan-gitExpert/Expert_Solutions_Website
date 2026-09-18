@@ -20,9 +20,13 @@ export default function ComplaintsPage() {
 
         <h2 className="text-lg font-bold text-navy-900">How to Make a Complaint</h2>
         <p>
-          You can make a complaint by phone on {siteConfig.phoneDisplay}, or
-          by email to {siteConfig.companyEmail}, or by writing to us at{' '}
-          {siteConfig.companyAddress}.
+          {siteConfig.phoneConfigured ? (
+            <>You can make a complaint by phone on {siteConfig.phoneDisplay}, or by email to {siteConfig.companyEmail}, or by writing to us at{' '}
+            {siteConfig.companyAddress}.</>
+          ) : (
+            <>You can make a complaint by email to {siteConfig.companyEmail}, or by writing to us at{' '}
+            {siteConfig.companyAddress}.</>
+          )}
         </p>
 
         <h2 className="text-lg font-bold text-navy-900">What Happens Next</h2>

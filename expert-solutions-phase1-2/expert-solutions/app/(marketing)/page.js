@@ -5,6 +5,8 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import RelatedLinks from '@/components/RelatedLinks';
+import { SECTORS, LOCATIONS, TRIGGER_PAGES } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Compare Business Energy Costs | Free UK Commercial Energy Review',
@@ -39,6 +41,20 @@ export default function HomePage() {
       <WhatWeNeed />
       <Benefits />
       <Faq />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Business Energy by Location"
+          links={LOCATIONS.map((l) => ({ href: `/locations/${l.slug}`, label: `Business Energy in ${l.label}` }))}
+        />
+        <RelatedLinks
+          title="Moving Premises or Starting Up?"
+          links={TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel }))}
+        />
+      </section>
       <CtaBanner />
     </>
   );

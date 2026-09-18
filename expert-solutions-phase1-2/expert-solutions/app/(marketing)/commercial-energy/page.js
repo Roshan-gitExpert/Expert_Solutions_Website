@@ -5,6 +5,9 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedLinks from '@/components/RelatedLinks';
+import { CORE_PAGES, SECTORS, TRIGGER_PAGES } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Commercial Energy Solutions | UK Business Electricity & Gas',
@@ -33,6 +36,7 @@ const faqs = [
 export default function CommercialEnergyPage() {
   return (
     <>
+      <Breadcrumbs items={[]} current="Commercial Energy" />
       <Hero
         title="Commercial Energy Solutions for UK Businesses"
         subtitle="From single offices to multi-site retail, hospitality and industrial operations - get a free commercial energy review tailored to your business."
@@ -61,6 +65,20 @@ export default function CommercialEnergyPage() {
       <WhatWeNeed />
       <Benefits title="Built for Commercial Operators" benefits={benefits} />
       <Faq faqs={faqs} title="Commercial Energy - Frequently Asked Questions" />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Moving or Starting Up?"
+          links={TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel }))}
+        />
+        <RelatedLinks
+          title="Related Business Energy Pages"
+          links={CORE_PAGES.filter((p) => p.slug !== 'commercial-energy').map((p) => ({ href: `/${p.slug}`, label: p.label }))}
+        />
+      </section>
       <CtaBanner
         title="Get a Free Commercial Energy Review"
         subtitle="Speak to a specialist about your commercial electricity and gas today."

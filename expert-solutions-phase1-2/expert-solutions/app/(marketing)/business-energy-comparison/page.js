@@ -5,6 +5,9 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedLinks from '@/components/RelatedLinks';
+import { CORE_PAGES, SECTORS, TRIGGER_PAGES } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Business Energy Comparison | Compare UK Commercial Energy Options',
@@ -30,6 +33,7 @@ const faqs = [
 export default function BusinessEnergyComparisonPage() {
   return (
     <>
+      <Breadcrumbs items={[]} current="Business Energy Comparison" />
       <Hero
         title="Compare Business Energy Options Side by Side"
         subtitle="See how your current business electricity and gas contract compares before you renew. Free, no-obligation comparison."
@@ -62,6 +66,20 @@ export default function BusinessEnergyComparisonPage() {
         ]}
       />
       <Faq faqs={faqs} title="Business Energy Comparison - Frequently Asked Questions" />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Moving or Starting Up?"
+          links={TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel }))}
+        />
+        <RelatedLinks
+          title="Related Business Energy Pages"
+          links={CORE_PAGES.filter((p) => p.slug !== 'business-energy-comparison').map((p) => ({ href: `/${p.slug}`, label: p.label }))}
+        />
+      </section>
       <CtaBanner
         title="Start Your Free Business Energy Comparison"
         subtitle="Takes about two minutes - see how your current contract compares."

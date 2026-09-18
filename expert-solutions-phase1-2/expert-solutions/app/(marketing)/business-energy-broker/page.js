@@ -5,6 +5,9 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedLinks from '@/components/RelatedLinks';
+import { CORE_PAGES, SECTORS } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Business Energy Broker | UK Commercial Energy Intermediary',
@@ -24,6 +27,7 @@ const faqs = [
 export default function BusinessEnergyBrokerPage() {
   return (
     <>
+      <Breadcrumbs items={[]} current="Business Energy Broker" />
       <Hero
         title="Your UK Business Energy Broker"
         subtitle="We help UK businesses review and compare commercial electricity and gas options - clearly, and with no obligation."
@@ -64,6 +68,16 @@ export default function BusinessEnergyBrokerPage() {
         ]}
       />
       <Faq faqs={faqs} title="Business Energy Broker - Frequently Asked Questions" />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Related Business Energy Pages"
+          links={CORE_PAGES.filter((p) => p.slug !== 'business-energy-broker').map((p) => ({ href: `/${p.slug}`, label: p.label }))}
+        />
+      </section>
       <CtaBanner
         title="Talk to a Business Energy Broker"
         subtitle="Get a free, no-obligation review of your commercial energy options."

@@ -5,6 +5,9 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedLinks from '@/components/RelatedLinks';
+import { CORE_PAGES, SECTORS, TRIGGER_PAGES } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Business Energy Renewal | Renew Your UK Commercial Contract',
@@ -24,6 +27,7 @@ const faqs = [
 export default function BusinessEnergyRenewalPage() {
   return (
     <>
+      <Breadcrumbs items={[]} current="Business Energy Renewal" />
       <Hero
         title="Is Your Business Energy Contract Up for Renewal?"
         subtitle="Avoid rolling onto a higher out-of-contract rate. Get a free review of your options before your renewal date."
@@ -77,6 +81,20 @@ export default function BusinessEnergyRenewalPage() {
         ]}
       />
       <Faq faqs={faqs} title="Business Energy Renewal - Frequently Asked Questions" />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Moving or Starting Up?"
+          links={TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel }))}
+        />
+        <RelatedLinks
+          title="Related Business Energy Pages"
+          links={CORE_PAGES.filter((p) => p.slug !== 'business-energy-renewal').map((p) => ({ href: `/${p.slug}`, label: p.label }))}
+        />
+      </section>
       <CtaBanner
         title="Review Your Business Energy Before Renewal"
         subtitle="Speak to a specialist ahead of your contract end date."

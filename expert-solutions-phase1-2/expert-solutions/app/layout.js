@@ -15,11 +15,27 @@ export const metadata = {
     type: 'website',
     locale: 'en_GB',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${siteConfig.companyName} | UK Business Energy Comparison`,
+    description:
+      'Compare UK business electricity and gas costs. Free, no-obligation commercial energy review.',
+  },
 };
 
 export const viewport = {
   themeColor: '#071b33',
 };
+
+// A value still holding a bracketed placeholder (e.g. "[Registered
+// business address placeholder]") is deliberately left OUT of
+// structured data entirely - emitting a fake-looking address/phone
+// in JSON-LD would be worse than emitting nothing, and the site
+// owner has explicitly asked not to invent this information before
+// it's verified and supplied for real.
+function isRealValue(value) {
+  return Boolean(value) && !value.includes('[');
+}
 
 // This is the TRUE root layout - it wraps absolutely everything,
 // including both the public marketing site (app/(marketing)/layout.js)
@@ -33,16 +49,28 @@ export default function RootLayout({ children }) {
     '@type': 'Organization',
     name: siteConfig.companyLegalName,
     url: siteConfig.siteUrl,
-    telephone: siteConfig.phoneTel,
-    email: siteConfig.companyEmail,
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'GB',
-      streetAddress: siteConfig.companyAddress,
-    },
+    ...(isRealValue(siteConfig.phoneTel) ? { telephone: siteConfig.phoneTel } : {}),
+    ...(isRealValue(siteConfig.companyEmail) ? { email: siteConfig.companyEmail } : {}),
+    ...(isRealValue(siteConfig.companyAddress)
+      ? {
+          address: {
+            '@type': 'PostalAddress',
+            addressCountry: 'GB',
+            streetAddress: siteConfig.companyAddress,
+          },
+        }
+      : {}),
     areaServed: 'GB',
     description:
       'UK business and commercial energy comparison and brokerage service for electricity and gas.',
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteConfig.companyName,
+    url: siteConfig.siteUrl,
+    inLanguage: 'en-GB',
   };
 
   return (
@@ -52,6 +80,11 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         {children}
       </body>

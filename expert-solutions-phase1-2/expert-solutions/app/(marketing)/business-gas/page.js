@@ -5,6 +5,9 @@ import WhatWeNeed from '@/components/WhatWeNeed';
 import Benefits from '@/components/Benefits';
 import Faq from '@/components/Faq';
 import CtaBanner from '@/components/CtaBanner';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedLinks from '@/components/RelatedLinks';
+import { CORE_PAGES, SECTORS, TRIGGER_PAGES } from '@/lib/seoData';
 
 export const metadata = {
   title: 'Business Gas Prices | Compare UK Commercial Gas Contracts',
@@ -33,6 +36,7 @@ const faqs = [
 export default function BusinessGasPage() {
   return (
     <>
+      <Breadcrumbs items={[]} current="Business Gas" />
       <Hero
         title="Compare Business Gas Prices"
         subtitle="Get a free review of your commercial gas contract - Annual Quantity, unit rates and renewal options explained clearly."
@@ -60,6 +64,20 @@ export default function BusinessGasPage() {
       <WhatWeNeed />
       <Benefits title="What We Help With" benefits={benefits} />
       <Faq faqs={faqs} title="Business Gas - Frequently Asked Questions" />
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <RelatedLinks
+          title="Business Energy by Sector"
+          links={SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label }))}
+        />
+        <RelatedLinks
+          title="Moving or Starting Up?"
+          links={TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel }))}
+        />
+        <RelatedLinks
+          title="Related Business Energy Pages"
+          links={CORE_PAGES.filter((p) => p.slug !== 'business-gas').map((p) => ({ href: `/${p.slug}`, label: p.label }))}
+        />
+      </section>
       <CtaBanner
         title="Get a Free Business Gas Review"
         subtitle="Speak to a specialist about your commercial gas contract today."

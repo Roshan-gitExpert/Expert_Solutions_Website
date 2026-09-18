@@ -27,7 +27,13 @@ export default function ContactUsPage() {
           <div className="mt-8 space-y-4">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-wide text-navy-400">Phone</h2>
-              <p className="text-lg font-bold text-navy-900">{siteConfig.phoneDisplay}</p>
+              {siteConfig.phoneConfigured ? (
+                <p className="text-lg font-bold text-navy-900">{siteConfig.phoneDisplay}</p>
+              ) : (
+                <p className="text-lg font-bold text-navy-900">
+                  <a href="#lead-form" className="text-teal-600 hover:underline">Request a callback</a>
+                </p>
+              )}
               <p className="text-sm text-navy-500">{siteConfig.openingHours}</p>
             </div>
             <div>

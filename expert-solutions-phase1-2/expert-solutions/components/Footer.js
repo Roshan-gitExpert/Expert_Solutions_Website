@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import siteConfig from '@/lib/config';
+import { TRIGGER_PAGES, SECTORS, LOCATIONS } from '@/lib/seoData';
 
 const COLUMNS = [
   {
@@ -9,14 +10,27 @@ const COLUMNS = [
       { href: '/business-electricity', label: 'Business Electricity' },
       { href: '/business-gas', label: 'Business Gas' },
       { href: '/commercial-energy', label: 'Commercial Energy' },
-    ],
-  },
-  {
-    heading: 'Compare & Renew',
-    links: [
       { href: '/business-energy-comparison', label: 'Business Energy Comparison' },
       { href: '/business-energy-renewal', label: 'Business Energy Renewal' },
       { href: '/business-energy-broker', label: 'Business Energy Broker' },
+    ],
+  },
+  {
+    heading: 'Moving or Starting Up',
+    links: TRIGGER_PAGES.map((t) => ({ href: `/${t.slug}`, label: t.shortLabel })),
+  },
+  {
+    heading: 'By Sector',
+    links: [
+      { href: '/sectors', label: 'All Sectors' },
+      ...SECTORS.map((s) => ({ href: `/sectors/${s.slug}`, label: s.label })),
+    ],
+  },
+  {
+    heading: 'By Location',
+    links: [
+      { href: '/locations', label: 'All Locations' },
+      ...LOCATIONS.map((l) => ({ href: `/locations/${l.slug}`, label: `Business Energy in ${l.label}` })),
     ],
   },
   {
@@ -35,7 +49,7 @@ export default function Footer() {
   return (
     <footer className="bg-navy-950 text-navy-200">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2">
             <div className="mb-3 flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-lg font-black text-navy-950">
@@ -49,9 +63,15 @@ export default function Footer() {
               ahead of renewal. We work with businesses only - not
               residential or domestic customers.
             </p>
-            <p className="mt-4 text-sm text-navy-300">
-              Call us: <a href={`tel:${siteConfig.phoneTel}`} className="font-semibold text-teal-300 hover:underline">{siteConfig.phoneDisplay}</a>
-            </p>
+            {siteConfig.phoneConfigured ? (
+              <p className="mt-4 text-sm text-navy-300">
+                Call us: <a href={`tel:${siteConfig.phoneTel}`} className="font-semibold text-teal-300 hover:underline">{siteConfig.phoneDisplay}</a>
+              </p>
+            ) : (
+              <p className="mt-4 text-sm text-navy-300">
+                <a href="#lead-form" className="font-semibold text-teal-300 hover:underline">Request a free energy review</a>
+              </p>
+            )}
             <p className="text-sm text-navy-300">
               Email: <a href={`mailto:${siteConfig.companyEmail}`} className="font-semibold text-teal-300 hover:underline">{siteConfig.companyEmail}</a>
             </p>
