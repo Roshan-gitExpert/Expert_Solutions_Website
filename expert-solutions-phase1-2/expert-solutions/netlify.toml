@@ -1,9 +1,19 @@
 [build]
-  command = "npm run build"
-  publish = ".next"
+command = "npm run build"
+publish = ".next"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
+package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NODE_VERSION = "20"
+NODE_VERSION = "20"
+
+# Domain migration: expertbridgesolutions.co.uk is now the primary
+# domain. This 301s any requests that still arrive on the old
+# Netlify subdomain (already-indexed URLs, old links, bookmarks)
+# through to the same path on the new domain, so nothing 404s.
+[[redirects]]
+from = "https://scintillating-axolotl-06406d.netlify.app/*"
+to = "https://expertbridgesolutions.co.uk/:splat"
+status = 301
+force = true
