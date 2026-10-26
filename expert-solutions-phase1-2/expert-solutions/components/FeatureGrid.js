@@ -4,7 +4,7 @@ const FEATURES = [
         accent: 'teal',
         label: 'Electricity',
         title: 'Business Electricity',
-        desc: 'A whole-of-market comparison on your current contract, matched to what you actually use.',
+              desc: 'A whole-of-market comparison on your current contract - we look at the price per kilowatt hour you’re paying now and benchmark it against current small business electricity pricing across the market.',
   },
   {
         key: 'gas',
@@ -47,8 +47,9 @@ export default function FeatureGrid() {
                   One Review, Every Option On The Table
       </h2>
             <p className="mt-3 text-navy-300">
-                  Whether it is power, gas, or both, we check prices across the whole
-              market rather than working from a single supplier list.
+          Whether it is power, gas, or both, we check commercial electricity rates across
+                the whole market rather than working from a single supplier list - giving you a
+                            genuine business electricity comparison, not just one quote.
                 </p>
                 </div>
 
