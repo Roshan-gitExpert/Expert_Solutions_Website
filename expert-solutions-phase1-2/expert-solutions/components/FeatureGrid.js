@@ -4,14 +4,14 @@ const FEATURES = [
         accent: 'teal',
         label: 'Electricity',
         title: 'Business Electricity',
-        desc: 'Whole-of-market comparison on your commercial electricity contract, sized to your actual usage.',
+        desc: 'A whole-of-market comparison on your current contract, matched to what you actually use.',
   },
   {
         key: 'gas',
         accent: 'amber',
         label: 'Gas',
         title: 'Business Gas',
-        desc: 'Compare commercial gas rates across UK suppliers, with renewal timing flagged so you avoid out-of-contract rates.',
+        desc: 'We check commercial gas rates across UK suppliers and flag your renewal date so you don’t slip onto a pricier out-of-contract rate.',
   },
   {
         key: 'green',
@@ -47,8 +47,8 @@ export default function FeatureGrid() {
                   One Review, Every Option On The Table
       </h2>
             <p className="mt-3 text-navy-300">
-                  Electricity, gas, or both - compared across the whole market, not
-              a fixed supplier panel.
+                  Whether it is power, gas, or both, we check prices across the whole
+              market rather than working from a single supplier list.
                 </p>
                 </div>
 
