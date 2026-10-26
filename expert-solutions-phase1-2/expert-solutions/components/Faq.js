@@ -13,15 +13,15 @@ const DEFAULT_FAQS = [
   },
   {
         q: 'Will I have to switch supplier?',
-        a: 'No. You’re under no obligation to switch, or to do anything at all, after speaking with us. The review is there to help you make an informed choice.',
+              a: 'No. You’re under no obligation to switch, or to do anything at all, after speaking with us. We’ll compare business electricity rates on your behalf so the review simply helps you make an informed choice.',
   },
   {
         q: 'What information will I need?',
-        a: 'It helps to have your postcode, your current supplier (if you know it) and your renewal date - but we can still help even if a few details are missing.',
+              a: 'It helps to have your postcode, your current supplier (if you know it) and your renewal date - these are the details we use to compare business energy prices accurately, but we can still help even if a few are missing.',
   },
   {
         q: 'How long does switching take?',
-        a: 'It depends on your current contract and notice period. Once a specialist understands your situation, they’ll give you a realistic timescale.',
+              a: 'It depends on your current contract and notice period. Once a specialist understands your situation and has helped you find the cheapest business electricity supplier for your usage, they’ll give you a realistic timescale.',
   },
   {
         q: 'Do you work with businesses with multiple sites?',
