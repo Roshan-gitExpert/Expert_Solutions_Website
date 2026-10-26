@@ -15,64 +15,64 @@
 
 export const TRIGGER_PAGES = [
   {
-    slug: 'business-energy-new-premises',
-    label: 'New Premises',
-    shortLabel: 'New Premises Energy',
+        slug: 'business-energy-new-premises',
+        label: 'New Premises',
+        shortLabel: 'New Premises Energy',
   },
   {
-    slug: 'business-energy-change-of-tenancy',
-    label: 'Change of Tenancy',
-    shortLabel: 'Change of Tenancy',
+        slug: 'business-energy-change-of-tenancy',
+        label: 'Change of Tenancy',
+        shortLabel: 'Change of Tenancy',
   },
   {
-    slug: 'business-energy-new-business',
-    label: 'New Business',
-    shortLabel: 'New Business Energy',
+        slug: 'business-energy-new-business',
+        label: 'New Business',
+        shortLabel: 'New Business Energy',
   },
   {
-    slug: 'business-energy-relocation',
-    label: 'Relocation',
-    shortLabel: 'Business Relocation',
+        slug: 'business-energy-relocation',
+        label: 'Relocation',
+        shortLabel: 'Business Relocation',
   },
   {
-    slug: 'business-energy-new-branch',
-    label: 'New Branch / Expansion',
-    shortLabel: 'New Branch Energy',
+        slug: 'business-energy-new-branch',
+        label: 'New Branch / Expansion',
+        shortLabel: 'New Branch Energy',
   },
-];
+  ];
 
 export const SECTORS = [
   {
-    slug: 'restaurants',
-    label: 'Restaurants & Cafes',
-    summary: 'High gas usage from kitchens, extraction and refrigeration.',
+        slug: 'restaurants',
+        label: 'Restaurants & Cafes',
+        summary: 'High gas usage from kitchens, extraction and refrigeration.',
   },
   {
-    slug: 'hotels',
-    label: 'Hotels & Hospitality',
-    summary: '24/7 heating, hot water and lighting across multiple rooms.',
+        slug: 'hotels',
+        label: 'Hotels & Hospitality',
+        summary: '24/7 heating, hot water and lighting across multiple rooms.',
   },
   {
-    slug: 'retail',
-    label: 'Retail',
-    summary: 'Extended trading hours, refrigeration and shopfront lighting.',
+        slug: 'retail',
+        label: 'Retail',
+        summary: 'Extended trading hours, refrigeration and shopfront lighting.',
   },
   {
-    slug: 'offices',
-    label: 'Offices',
-    summary: 'Daytime HVAC, lighting and IT load across standard hours.',
+        slug: 'offices',
+        label: 'Offices',
+        summary: 'Daytime HVAC, lighting and IT load across standard hours.',
   },
   {
-    slug: 'care-homes',
-    label: 'Care Homes',
-    summary: 'Continuous heating and hot water with strict comfort requirements.',
+        slug: 'care-homes',
+        label: 'Care Homes',
+        summary: 'Continuous heating and hot water with strict comfort requirements.',
   },
   {
-    slug: 'manufacturing',
-    label: 'Manufacturing & Warehousing',
-    summary: 'Higher-consumption three-phase power and extended shift patterns.',
+        slug: 'manufacturing',
+        label: 'Manufacturing & Warehousing',
+        summary: 'Higher-consumption three-phase power and extended shift patterns.',
   },
-];
+  ];
 
 // DNO (Distribution Network Operator) data - the company that owns
 // and maintains the local electricity wires in each region. This is
@@ -82,54 +82,54 @@ export const SECTORS = [
 // Source: Energy Networks Association DNO region list.
 export const LOCATIONS = [
   {
-    slug: 'london',
-    label: 'London',
-    region: 'Greater London',
-    dnoOperator: 'UK Power Networks',
-    dnoRegion: 'London',
-    dnoCode: 'C',
+        slug: 'london',
+        label: 'London',
+        region: 'Greater London',
+        dnoOperator: 'UK Power Networks',
+        dnoRegion: 'London',
+        dnoCode: 'C',
   },
   {
-    slug: 'manchester',
-    label: 'Manchester',
-    region: 'North West England',
-    dnoOperator: 'Electricity North West',
-    dnoRegion: 'North West England',
-    dnoCode: 'G',
+        slug: 'manchester',
+        label: 'Manchester',
+        region: 'North West England',
+        dnoOperator: 'Electricity North West',
+        dnoRegion: 'North West England',
+        dnoCode: 'G',
   },
   {
-    slug: 'birmingham',
-    label: 'Birmingham',
-    region: 'West Midlands',
-    dnoOperator: 'National Grid Electricity Distribution',
-    dnoRegion: 'West Midlands',
-    dnoCode: 'E',
+        slug: 'birmingham',
+        label: 'Birmingham',
+        region: 'West Midlands',
+        dnoOperator: 'National Grid Electricity Distribution',
+        dnoRegion: 'West Midlands',
+        dnoCode: 'E',
   },
   {
-    slug: 'leeds',
-    label: 'Leeds',
-    region: 'Yorkshire',
-    dnoOperator: 'Northern Powergrid',
-    dnoRegion: 'Yorkshire',
-    dnoCode: 'M',
+        slug: 'leeds',
+        label: 'Leeds',
+        region: 'Yorkshire',
+        dnoOperator: 'Northern Powergrid',
+        dnoRegion: 'Yorkshire',
+        dnoCode: 'M',
   },
   {
-    slug: 'glasgow',
-    label: 'Glasgow',
-    region: 'Central Scotland',
-    dnoOperator: 'SP Energy Networks',
-    dnoRegion: 'Southern Scotland',
-    dnoCode: 'N',
+        slug: 'glasgow',
+        label: 'Glasgow',
+        region: 'Central Scotland',
+        dnoOperator: 'SP Energy Networks',
+        dnoRegion: 'Southern Scotland',
+        dnoCode: 'N',
   },
   {
-    slug: 'bristol',
-    label: 'Bristol',
-    region: 'South West England',
-    dnoOperator: 'National Grid Electricity Distribution',
-    dnoRegion: 'South West England',
-    dnoCode: 'L',
+        slug: 'bristol',
+        label: 'Bristol',
+        region: 'South West England',
+        dnoOperator: 'National Grid Electricity Distribution',
+        dnoRegion: 'South West England',
+        dnoCode: 'L',
   },
-];
+  ];
 
 // Core, pre-existing service/comparison pages - used by RelatedLinks
 // to point trigger/sector/location pages back into the main site.
@@ -141,4 +141,34 @@ export const CORE_PAGES = [
   { slug: 'business-energy-comparison', label: 'Business Energy Comparison' },
   { slug: 'business-energy-renewal', label: 'Business Energy Renewal' },
   { slug: 'business-energy-broker', label: 'Business Energy Broker' },
-];
+  ];
+
+// Compliance pillar - long-tail pages explaining the regulatory/contract
+// mechanics around deemed rates, out-of-contract tariffs and contract
+// pricing structures. Each is a standalone static page under
+// app/(marketing)/compliance/<slug>, registered here so the sitemap and
+// RelatedLinks can reference them without hard-coded URLs elsewhere.
+export const COMPLIANCE_PAGES = [
+  { slug: 'deemed-rates', label: 'Avoiding Deemed Energy Rates' },
+  { slug: 'tariff-penalties', label: 'Out-of-Contract Tariff Penalties' },
+  { slug: 'fixed-vs-pass-through', label: 'Fixed vs Pass-Through Contracts' },
+  ];
+
+// Metering pillar - long-tail pages on meter mechanics (relocation,
+// half-hourly settlement, MPAN lookup). Standalone static pages under
+// app/(marketing)/metering/<slug>.
+export const METERING_PAGES = [
+  { slug: 'gas-meter-relocation', label: 'Moving a Commercial Gas Meter' },
+  { slug: 'half-hourly-meters', label: 'Half-Hourly Meter Installation' },
+  { slug: 'find-mpan', label: 'Find Your Business MPAN' },
+  ];
+
+// Standalone long-tail sector pages that sit outside the SECTORS list
+// above (SECTORS drives the dynamic /sectors/[slug] route, the "Other
+// Sectors We Help" cross-links and the sector hub page - this array is
+// deliberately separate so it doesn't duplicate/collide with the
+// existing generic "retail" sector entry). Registered here purely for
+// the sitemap and footer.
+export const EXTRA_SECTOR_PAGES = [
+  { slug: 'retail-shops', label: 'Small Retail Shops' },
+  ];
