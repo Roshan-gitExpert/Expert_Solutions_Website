@@ -3,16 +3,42 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-  body {
-    @apply bg-white text-navy-900 antialiased;
-  }
+    html {
+          scroll-behavior: smooth;
+    }
+    body {
+          @apply bg-white text-navy-900 antialiased;
+    }
 }
 
 @layer components {
-  .input {
-    @apply w-full rounded-lg border border-navy-200 bg-white px-4 py-3 text-sm text-navy-900 placeholder:text-navy-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30;
+    .input {
+          @apply w-full rounded-lg border border-navy-200 bg-white px-4 py-3 text-sm text-navy-900 placeholder:text-navy-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30;
+    }
+
+  /* Dashboard-style floating panel: dark surface, hairline border,
+       subtle inner highlight. Used for stat cards, chart containers,
+       and anything meant to read as "structured data", not a text block. */
+  .panel {
+        @apply relative rounded-xl2 border border-white/10 bg-navy-900 shadow-panel;
+  }
+
+  .panel-light {
+        @apply relative rounded-xl2 border border-navy-100 bg-white shadow-card;
+  }
+
+  /* Faint technical grid backdrop for dark sections - signals
+       "dashboard" rather than "marketing page". */
+  .bg-grid-overlay {
+        background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+  }
+
+  /* Small uppercase label used above metrics/headings in the
+       dashboard-style sections, e.g. "LIVE MARKET DATA". */
+  .label-eyebrow {
+        @apply inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-teal-300;
   }
 }
