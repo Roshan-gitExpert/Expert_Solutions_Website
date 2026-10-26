@@ -1,102 +1,131 @@
-// Dashboard-style "market trend" panel. This is an illustrative
-// placeholder, not a live data feed - no real wholesale price figures
-// exist yet. Renders as a styled chart container so the layout/visual
-// language is locked in; swap `POINTS` for a real series (or wire up
-// an API) once actual market data is available. Never present this
-// as real pricing without replacing the data source.
-const POINTS = [62, 58, 65, 70, 66, 74, 71, 78, 73, 80, 76, 84];
-const WIDTH = 560;
-const HEIGHT = 180;
-const PADDING = 16;
+'use client';
 
-function toPath(points) {
-    const max = Math.max(...points);
-    const min = Math.min(...points);
-    const range = max - min || 1;
-    const stepX = (WIDTH - PADDING * 2) / (points.length - 1);
+import { useEffect, useState } from 'react';
 
-  return points
-      .map((p, i) => {
-              const x = PADDING + i * stepX;
-              const y = HEIGHT - PADDING - ((p - min) / range) * (HEIGHT - PADDING * 2);
-              return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-      })
-      .join(' ');
+const FUEL_STYLES = {
+      wind: { label: 'Wind', bar: 'bg-teal-400' },
+      gas: { label: 'Gas', bar: 'bg-amber-400' },
+      nuclear: { label: 'Nuclear', bar: 'bg-emerald-400' },
+      solar: { label: 'Solar', bar: 'bg-yellow-300' },
+      biomass: { label: 'Biomass', bar: 'bg-lime-400' },
+      hydro: { label: 'Hydro', bar: 'bg-sky-400' },
+      imports: { label: 'Imports', bar: 'bg-violet-400' },
+      coal: { label: 'Coal', bar: 'bg-rose-400' },
+      other: { label: 'Other', bar: 'bg-navy-400' },
+};
+
+const INDEX_STYLES = {
+      'very low': 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+      low: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+      moderate: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+      high: 'border-rose-500/30 bg-rose-500/10 text-rose-300',
+      'very high': 'border-rose-500/30 bg-rose-500/10 text-rose-300',
+};
+
+function formatTime(iso) {
+      if (!iso) return '';
+      try {
+              return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      } catch {
+              return '';
+      }
 }
 
 export default function MarketPriceTrend() {
-    const linePath = toPath(POINTS);
-    const areaPath = `${linePath} L${WIDTH - PADDING},${HEIGHT - PADDING} L${PADDING},${HEIGHT - PADDING} Z`;
+      const [data, setData] = useState(null);
+      const [error, setError] = useState(false);
+
+  useEffect(() => {
+          let cancelled = false;
+
+                async function load() {
+                          try {
+                                      const res = await fetch('/api/grid-mix', { cache: 'no-store' });
+                                      if (!res.ok) throw new Error('bad response');
+                                      const json = await res.json();
+                                      if (!cancelled) {
+                                                    setData(json);
+                                                    setError(false);
+                                      }
+                          } catch {
+                                      if (!cancelled) setError(true);
+                          }
+                }
+
+                load();
+          const interval = setInterval(load, 5 * 60 * 1000);
+          return () => {
+                    cancelled = true;
+                    clearInterval(interval);
+          };
+  }, []);
+
+  const mix = (data?.generationmix || []).slice().sort((a, b) => b.perc - a.perc);
+      const indexKey = (data?.intensity?.index || '').toLowerCase();
 
   return (
-        <div className="panel bg-grid-overlay p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="label-eyebrow">Market Intelligence</span>
-            <h3 className="mt-3 text-lg font-bold text-white">
-                Commercial Energy Price Trend
-    </h3>
-            <p className="mt-1 text-sm text-navy-300">
-                Illustrative market movement. Your review uses live supplier
-              rates, not this chart.
-                </p>
-                </div>
-          <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300">
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                          Updated this quarter
-                </div>
-                </div>
+          <div className="panel bg-grid-overlay p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span className="label-eyebrow">Live Grid Data</span>
+              <h3 className="mt-3 text-lg font-bold text-white">
+                  Live UK Power Generation Mix &amp; Grid Demand
+      </h3>
+              <p className="mt-1 max-w-xl text-sm text-navy-300">
+                  Real-time figures below track Great Britain&apos;s power sources and grid carbon
+                intensity straight from the National Grid ESO system, to support corporate energy
+                strategy.
+                    </p>
+                    </div>
 
-      <div className="mt-6 overflow-hidden rounded-lg border border-white/5">
-                        <svg
-            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-auto w-full"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label="Illustrative commercial energy price trend chart"
-        >
-                      <defs>
-                        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#0fb8a6" stopOpacity="0.35" />
-                          <stop offset="100%" stopColor="#0fb8a6" stopOpacity="0" />
-            </linearGradient>
-            </defs>
-{[0.25, 0.5, 0.75].map((f) => (
-              <line
-                                     key={f}
-               x1={PADDING}
-               x2={WIDTH - PADDING}
-              y1={HEIGHT * f}
-              y2={HEIGHT * f}
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth="1"
-            />
-                          ))}
-          <path d={areaPath} fill="url(#trendFill)" />
-                          <path d={linePath} fill="none" stroke="#22cdb8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                </div>
+    {data?.intensity && (
+                  <div
+                 className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold ${
+                                   INDEX_STYLES[indexKey] || 'border-navy-400/30 bg-navy-400/10 text-navy-300'
+                 }`}
+              >
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
+              {data.intensity.actual ?? data.intensity.forecast} gCO2/kWh &middot; {data.intensity.index}
+    </div>
+            )}
+</div>
 
-      <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-white/10 pt-5">
-                        <div>
-                          <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy-400">
-                            Electricity
-                </dt>
-          <dd className="mt-1 text-sm font-bold text-white">Market-wide view</dd>
-                </div>
-        <div>
-                          <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy-400">
-                            Gas
-                </dt>
-          <dd className="mt-1 text-sm font-bold text-white">Market-wide view</dd>
-                </div>
-        <div>
-                          <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy-400">
-                            Green energy
-                </dt>
-          <dd className="mt-1 text-sm font-bold text-white">On request</dd>
-                </div>
-                </dl>
-                </div>
-  );
+      <div className="mt-6 rounded-lg border border-white/5 p-5 sm:p-6">
+{error && (
+              <p className="text-sm text-navy-300">
+                Live grid data is temporarily unavailable. Please check back shortly.
+    </p>
+        )}
+
+{!error && !data && <p className="text-sm text-navy-300">Loading live grid data&hellip;</p>}
+
+ {!error && data && mix.length > 0 && (
+               <div className="space-y-4">
+ {mix.map((item) => {
+                   const style = FUEL_STYLES[item.fuel] || { label: item.fuel, bar: 'bg-navy-400' };
+                   return (
+                                       <div key={item.fuel}>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold text-white">{style.label}</span>
+                              <span className="font-bold text-navy-300">{item.perc.toFixed(1)}%</span>
+          </div>
+                            <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                              <div
+                                className={`h-full rounded-full ${style.bar}`}
+                       style={{ width: `${Math.min(Math.max(item.perc, 0), 100)}%` }}
+                    />
+                        </div>
+                        </div>
+              );
+})}
+</div>
+        )}
+</div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs text-navy-400">
+            <span>Source: National Grid ESO Carbon Intensity API</span>
+{data?.to && <span>Settlement period to {formatTime(data.to)}</span>}
+    </div>
+    </div>
+   );
 }
