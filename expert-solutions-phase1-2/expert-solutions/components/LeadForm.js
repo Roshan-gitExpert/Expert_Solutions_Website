@@ -176,7 +176,7 @@ export default function LeadForm({ variant = 'standard' }) {
   const progressPercent = (step / 3) * 100;
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-card sm:p-8">
+    <div className="rounded-xl2 bg-white p-6 shadow-glow-teal sm:p-8">
       <div className="mb-6">
         <div className="mb-2 flex items-center justify-between text-sm font-semibold text-navy-700">
           <span>Step {step} of 3</span>
