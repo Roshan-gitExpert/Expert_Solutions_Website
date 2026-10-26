@@ -5,28 +5,28 @@ import siteConfig from '@/lib/config';
 // only on pages describing an actual service Expert Solutions
 // performs: comparing/arranging business electricity, gas, etc.)
 export default function ServiceSchema({ name, description, areaServed = 'GB' }) {
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    serviceType: name,
-    name,
-    description,
-    provider: {
-      '@type': 'Organization',
-      name: siteConfig.companyLegalName,
-      url: siteConfig.siteUrl,
-    },
-    areaServed,
-    audience: {
-      '@type': 'BusinessAudience',
-      audienceType: 'UK businesses',
-    },
-  };
+    const schema = {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          serviceType: name,
+          name,
+          description,
+          provider: {
+                  '@type': 'Organization',
+                  name: siteConfig.companyName,
+                  url: siteConfig.siteUrl,
+          },
+          areaServed,
+          audience: {
+                  '@type': 'BusinessAudience',
+                  audienceType: 'UK businesses',
+          },
+    };
 
   return (
-    <script
-      type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
+        <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );
