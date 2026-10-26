@@ -20,7 +20,7 @@ export default function HomePage() {
               <>
                 <Hero
             title="Compare Your Business Energy Costs"
-            subtitle="See whether you could be paying less for your electricity and gas. A UK-based energy specialist will take a look at your account and talk you through your options - no obligation, no pressure."
+                    subtitle="See whether you could be paying less on your business electricity rates and gas. A UK-based energy specialist will compare business electricity prices across the market and talk you through your options - no obligation, no pressure."
             formVariant="homepage"
           />
                       <TrustBar />
