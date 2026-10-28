@@ -11,7 +11,7 @@ const FEATURES = [
         accent: 'amber',
         label: 'Gas',
         title: 'Business Gas',
-        desc: 'We check commercial gas rates across UK suppliers and flag your renewal date so you don’t slip onto a pricier out-of-contract rate.',
+              desc: 'We check commercial gas rates across UK suppliers - including the cheapest business gas rates for UK care homes and other regulated sectors - and flag your renewal date so you don’t slip onto a pricier out-of-contract rate.',
   },
   {
         key: 'green',
