@@ -43,17 +43,19 @@ export const siteConfig = {
           process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'stuartleigh@expertbridgesolutions.com',
 
 
-    // siteUrl resolution order:
-    // 1. NEXT_PUBLIC_SITE_URL - set this once a custom domain exists.
-    // 2. process.env.URL - some hosts set this automatically at build
-    //    time to the site's real deployment address, with no
-    //    configuration needed.
-    // 3. A placeholder, only ever used if neither of the above exists
-    //    (e.g. a local build with no env vars set at all).
-    siteUrl:
-          process.env.NEXT_PUBLIC_SITE_URL ||
-          process.env.URL ||
-          'https://www.expertbridgesolutions.co.uk',
+        // siteUrl resolution order:
+        // 1. NEXT_PUBLIC_SITE_URL - set this once a custom domain exists.
+        // 2. A hardcoded production fallback. Deliberately NOT reading
+        //    process.env.URL here - that var is a Netlify build-time
+        //    convention (left over from before this site moved to
+        //    Vercel) and has no defined meaning on Vercel, so trusting
+        //    it risked silently resolving metadataBase/canonical tags
+        //    to a stale Netlify deployment URL instead of the real
+        //    domain - the exact kind of bug that produces "Duplicate
+        //    without user-selected canonical" in Search Console.
+        siteUrl:
+                  process.env.NEXT_PUBLIC_SITE_URL ||
+                  'https://www.expertbridgesolutions.co.uk',
 
     // Phone - deliberately empty (not a fake-looking number) until a
     // real one is configured. phoneConfigured lets components decide
