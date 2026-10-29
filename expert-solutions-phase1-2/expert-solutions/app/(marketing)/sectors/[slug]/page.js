@@ -8,14 +8,22 @@ import CtaBanner from '@/components/CtaBanner';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RelatedLinks from '@/components/RelatedLinks';
 import ServiceSchema from '@/components/ServiceSchema';
-import { SECTORS, CORE_PAGES } from '@/lib/seoData';
+import { SECTORS, SECTOR_PAGE_OVERRIDES, CORE_PAGES } from '@/lib/seoData';
 import { SECTOR_CONTENT } from '@/lib/sectorContent';
 
+// Slugs in SECTOR_PAGE_OVERRIDES have their own dedicated static page
+// under app/(marketing)/sectors/<slug>/page.js (see the comment on
+// SECTOR_PAGE_OVERRIDES in lib/seoData.js) - they are deliberately
+// excluded here so this dynamic route never prerenders a colliding file
+// at the same output path.
 export function generateStaticParams() {
-  return SECTORS.map((sector) => ({ slug: sector.slug }));
+  return SECTORS.filter((sector) => !SECTOR_PAGE_OVERRIDES.includes(sector.slug)).map((sector) => ({
+    slug: sector.slug,
+  }));
 }
 
 function getSector(slug) {
+  if (SECTOR_PAGE_OVERRIDES.includes(slug)) return undefined;
   return SECTORS.find((s) => s.slug === slug);
 }
 
