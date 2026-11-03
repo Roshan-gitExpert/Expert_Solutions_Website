@@ -161,6 +161,14 @@ export function sendEvent(eventName, data = {}) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push(payload);
 
+    // Fire the Google Ads conversion the moment a lead form is
+    // successfully completed, so Ads measures real leads, not just clicks.
+    if (eventName === EVENTS.FORM_COMPLETED && typeof window.gtag === 'function') {
+        window.gtag('event', 'conversion', {
+            send_to: 'AW-18547421856/IpmfCMTUwbAdEKDljIxF',
+        });
+    }
+
   fetch('/api/events', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
