@@ -1,6 +1,49 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 
+// Emails a quick notification to the inbox in LEAD_NOTIFY_TO whenever a
+// new lead comes in, using Resend. Safe to call even if Resend isn't
+// configured yet - it just skips silently so lead saving never breaks.
+async function sendLeadNotificationEmail(lead, leadId) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.LEAD_NOTIFY_TO;
+  if (!apiKey || !to) return;
+
+  const from = process.env.LEAD_NOTIFY_FROM || 'Expert Solutions Leads <onboarding@resend.dev>';
+
+  const lines = [
+    `Business: ${lead.businessName}`,
+    `Contact: ${lead.contactName}`,
+    `Phone: ${lead.phone}`,
+    `Email: ${lead.email}`,
+    lead.postcode ? `Postcode: ${lead.postcode}` : null,
+    lead.businessType ? `Business type: ${lead.businessType}` : null,
+    lead.energyType ? `Energy type: ${lead.energyType}` : null,
+    lead.spend ? `Approx spend: ${lead.spend}` : null,
+    lead.currentSupplier ? `Current supplier: ${lead.currentSupplier}` : null,
+    lead.contractEndDate ? `Contract end date: ${lead.contractEndDate}` : null,
+    ].filter(Boolean);
+
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: `New lead: ${lead.businessName}`,
+        text: `${lines.join('\n')}\n\nLead ID: ${leadId}`,
+      }),
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[api/leads] failed to send notification email', err);
+  }
+}
+
 // Receives a completed lead-form submission from components/LeadForm.js,
 // upserts the visitor, creates the lead, and records its PPC
 // attribution + initial "NEW" status - all server-side.
@@ -108,6 +151,8 @@ export async function POST(request) {
       conversion_page: attribution.conversionPage || null,
     });
 
+await sendLeadNotificationEmail(lead, insertedLead.id);
+    
     return NextResponse.json({ ok: true, leadId: insertedLead.id });
   } catch (err) {
     // eslint-disable-next-line no-console
