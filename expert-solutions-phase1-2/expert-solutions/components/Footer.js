@@ -114,13 +114,13 @@ export default function Footer() {
         <div className="mt-10 border-t border-navy-800 pt-6 text-xs leading-relaxed text-navy-400">
           <p>
             Trading Address: 21 Ackton Close, Stoke-on-Trent, ST3 6SB,
-            England. Expertbridge Solutions is an independent energy
+            England. Expert Bridge Solutions is an independent energy
             broker and intermediary for UK business (non-domestic) energy
             customers only. We are not a direct energy supplier.
           </p>
           <p className="mt-2">
-            &copy; {new Date().getFullYear()} Expertbridge Solutions.
-            Expertbridge Solutions is a trading name of Veer Infotech.
+            &copy; {new Date().getFullYear()} Expert Bridge Solutions.
+            Expert Bridge Solutions is a trading name of Veer Infotech.
           </p>
         </div>
       </div>
