@@ -14,27 +14,20 @@
 // NOT depend on consent and are never gated by anything here.
 // ============================================================
 
+import { isGa4HostName, isConsentHostName } from './hosts';
+
 export const CONSENT_KEY = 'es_consent_v1';
 export const CONSENT_CHANGE_EVENT = 'es-consent-change';
 export const CONSENT_OPEN_EVENT = 'es-consent-open';
 const CONSENT_VERSION = 1;
 
-// ---- WHERE CONSENT / GA4 APPLY (explicit allow-list) ----
-// GA4 runs ONLY on the quote subdomain. The consent banner and consent
-// gating apply on that host plus non-production hosts (Vercel previews,
-// localhost) so they can be tested. On every other host - including
-// www.expertbridgesolutions.co.uk and the apex - nothing here is active
-// and tracking behaves exactly as it did before this change.
-export const GA4_HOST = 'quote.expertbridgesolutions.co.uk';
-
+// ---- WHERE CONSENT / GA4 APPLY: see lib/hosts.js (quote host only) ----
 export function isGa4Host() {
-  return typeof window !== 'undefined' && window.location.hostname === GA4_HOST;
+  return typeof window !== 'undefined' && isGa4HostName(window.location.hostname);
 }
 
 export function isConsentHost() {
-  if (typeof window === 'undefined') return false;
-  const h = window.location.hostname;
-  return h === GA4_HOST || h === 'localhost' || h.endsWith('.vercel.app');
+  return typeof window !== 'undefined' && isConsentHostName(window.location.hostname);
 }
 
 export function readConsent() {

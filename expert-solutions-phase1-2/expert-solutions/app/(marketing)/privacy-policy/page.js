@@ -1,4 +1,6 @@
+import { headers } from 'next/headers';
 import siteConfig from '@/lib/config';
+import { isConsentHostName } from '@/lib/hosts';
 
 export const metadata = {
     title: 'Privacy Policy',
@@ -7,6 +9,9 @@ export const metadata = {
 };
 
 export default function PrivacyPolicyPage() {
+  // Extra cookie wording is shown on the quote site only (www unchanged).
+  const h = headers();
+  const isQuote = isConsentHostName(h.get('x-forwarded-host') || h.get('host') || '');
     return (
           <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-extrabold text-navy-900">Privacy Policy</h1>
@@ -67,13 +72,18 @@ export default function PrivacyPolicyPage() {
           <p>
               This site uses cookies and similar technologies - see our{' '}
             <a href="/cookie-policy" className="text-teal-600 underline">Cookie Policy</a>{' '}
-            for details. With your permission we use Google Analytics and
-            Google Ads to measure how the site is used and how our advertising
-            performs; this involves Google receiving information such as your
-            IP address and the pages you visit. We only do this if you allow
-            analytics or advertising cookies, and you can change your choice
-            at any time using "Cookie settings" in the page footer. Sending
-            an enquiry does not depend on these choices.
+            for details.
+            {isQuote && (
+              <>
+                {' '}With your permission we use Google Analytics and
+                Google Ads to measure how the site is used and how our advertising
+                performs; this involves Google receiving information such as your
+                IP address and the pages you visit. We only do this if you allow
+                analytics or advertising cookies, and you can change your choice
+                at any time using "Cookie settings" in the page footer. Sending
+                an enquiry does not depend on these choices.
+              </>
+            )}
               </p>
 
         <h2 className="text-lg font-bold text-navy-900">Contact Us</h2>
