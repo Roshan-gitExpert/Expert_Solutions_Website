@@ -9,6 +9,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import RelatedLinks from '@/components/RelatedLinks';
 import ServiceSchema from '@/components/ServiceSchema';
 import { LOCATIONS, CORE_PAGES, SECTORS } from '@/lib/seoData';
+import { LOCATION_CONTENT } from '@/lib/locationContent';
 
 export function generateStaticParams() {
   return LOCATIONS.map((loc) => ({ slug: loc.slug }));
@@ -31,6 +32,7 @@ export function generateMetadata({ params }) {
 export default function LocationPage({ params }) {
   const loc = getLocation(params.slug);
   if (!loc) notFound();
+  const content = LOCATION_CONTENT[loc.slug];
 
   const faqs = [
     {
@@ -101,6 +103,22 @@ export default function LocationPage({ params }) {
             <dt className="text-xs font-semibold uppercase tracking-wide text-navy-400">DNO Area Code</dt>
             <dd className="mt-1 text-base font-bold text-navy-900">{loc.dnoCode}</dd>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-4 pb-16 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">
+          The Business Energy Landscape in {loc.label}
+        </h2>
+        <p className="mt-4 text-navy-500">{content.economy}</p>
+
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
+          {content.usagePoints.map((point) => (
+            <div key={point.title} className="rounded-2xl border border-navy-100 p-6">
+              <h3 className="text-base font-bold text-navy-900">{point.title}</h3>
+              <p className="mt-2 text-sm text-navy-500">{point.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
