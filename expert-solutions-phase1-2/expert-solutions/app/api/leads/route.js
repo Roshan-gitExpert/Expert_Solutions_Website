@@ -15,8 +15,9 @@ async function sendLeadNotificationEmail(lead, leadId) {
     `Business: ${lead.businessName}`,
     `Contact: ${lead.contactName}`,
     `Phone: ${lead.phone}`,
-    `Email: ${lead.email}`,
+    lead.email ? `Email: ${lead.email}` : null,
     lead.postcode ? `Postcode: ${lead.postcode}` : null,
+    lead.takeoverTiming ? `Took over premises: ${lead.takeoverTiming}` : null,
     lead.businessType ? `Business type: ${lead.businessType}` : null,
     lead.energyType ? `Energy type: ${lead.energyType}` : null,
     lead.spend ? `Approx spend: ${lead.spend}` : null,
@@ -65,7 +66,7 @@ export async function POST(request) {
   const lead = body && body.lead;
   const attribution = (body && body.attribution) || {};
 
-  if (!lead || !lead.businessName || !lead.contactName || !lead.phone || !lead.email) {
+  if (!lead || !lead.businessName || !lead.contactName || !lead.phone) {
     return NextResponse.json({ ok: false, reason: 'missing_fields' }, { status: 400 });
   }
 
@@ -104,29 +105,42 @@ export async function POST(request) {
       );
     }
 
-    const { data: insertedLead, error: leadError } = await supabase
+    const leadRow = {
+      visitor_id: attribution.visitorId || null,
+      source_type: lead.sourceType || 'form',
+      landing_page_variant: lead.variant || null,
+      business_name: lead.businessName,
+      postcode: lead.postcode || null,
+      contact_name: lead.contactName,
+      phone: lead.phone,
+      email: lead.email || null,
+      business_type: lead.businessType || null,
+      energy_type: lead.energyType || null,
+      spend_range: lead.spend || null,
+      current_supplier: lead.currentSupplier || null,
+      contract_end_date: lead.contractEndDate || null,
+      number_of_sites: lead.numberOfSites || null,
+      annual_consumption: lead.annualConsumption || null,
+      best_time_to_contact: lead.bestTimeToContact || null,
+      status: 'NEW',
+    };
+
+    // takeover_timing is a newer column. Try with it first; if the
+    // column has not been added to Supabase yet, retry without it so
+    // the lead is never lost (the timing is still in the email).
+    let { data: insertedLead, error: leadError } = await supabase
       .from('leads')
-      .insert({
-        visitor_id: attribution.visitorId || null,
-        source_type: lead.sourceType || 'form',
-        landing_page_variant: lead.variant || null,
-        business_name: lead.businessName,
-        postcode: lead.postcode || null,
-        contact_name: lead.contactName,
-        phone: lead.phone,
-        email: lead.email,
-        business_type: lead.businessType || null,
-        energy_type: lead.energyType || null,
-        spend_range: lead.spend || null,
-        current_supplier: lead.currentSupplier || null,
-        contract_end_date: lead.contractEndDate || null,
-        number_of_sites: lead.numberOfSites || null,
-        annual_consumption: lead.annualConsumption || null,
-        best_time_to_contact: lead.bestTimeToContact || null,
-        status: 'NEW',
-      })
+      .insert({ ...leadRow, takeover_timing: lead.takeoverTiming || null })
       .select()
       .single();
+
+    if (leadError && /takeover_timing/i.test(leadError.message || '')) {
+      ({ data: insertedLead, error: leadError } = await supabase
+        .from('leads')
+        .insert(leadRow)
+        .select()
+        .single());
+    }
 
     if (leadError) throw leadError;
 

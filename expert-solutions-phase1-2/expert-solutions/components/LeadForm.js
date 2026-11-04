@@ -4,56 +4,30 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendEvent, getAttribution, EVENTS } from '@/lib/tracking';
 
-const BUSINESS_TYPES = [
-  'Hotel',
-  'Restaurant / Hospitality',
-  'Retail',
-  'Office',
-  'Warehouse',
-  'Manufacturing',
-  'Construction',
-  'Care Home',
-  'School / Private Education',
-  'Logistics',
-  'Professional Services',
-  'Other SME',
+const TAKEOVER_OPTIONS = [
+  'Already moved in',
+  'Within the next 30 days',
+  'More than 30 days away',
 ];
 
-const SPEND_RANGES = [
+const ENERGY_OPTIONS = [
+  'Electricity',
+  'Gas',
+  'Both gas and electricity',
   'Not sure',
-  'Under £500 / month',
-  '£500 - £1,000 / month',
-  '£1,000 - £5,000 / month',
-  '£5,000 - £20,000 / month',
-  'Over £20,000 / month',
-];
-
-const CONTACT_TIMES = [
-  'Anytime during business hours',
-  'Morning (9am - 12pm)',
-  'Afternoon (12pm - 3pm)',
-  'Late afternoon (3pm - 5:30pm)',
 ];
 
 const initialData = {
   businessName: '',
-  postcode: '',
   contactName: '',
-  phone: '',
-  email: '',
-  businessType: '',
+  postcode: '',
+  takeoverTiming: '',
   energyType: '',
-  spend: '',
-  currentSupplier: '',
-  contractEndDate: '',
-  numberOfSites: '1',
-  annualConsumption: '',
-  bestTimeToContact: '',
+  phone: '',
 };
 
 export default function LeadForm({ variant = 'standard' }) {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [data, setData] = useState(initialData);
   const [website, setWebsite] = useState(''); // honeypot - stays empty for real visitors
   const [submitting, setSubmitting] = useState(false);
@@ -68,12 +42,12 @@ export default function LeadForm({ variant = 'standard' }) {
         hasStarted.current &&
         !hasCompleted.current
       ) {
-        sendEvent(EVENTS.FORM_ABANDONED, { lastStepReached: step });
+        sendEvent(EVENTS.FORM_ABANDONED, { lastStepReached: 1 });
       }
     }
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [step]);
+  }, []);
 
   function update(field, value) {
     if (!hasStarted.current) {
@@ -83,39 +57,23 @@ export default function LeadForm({ variant = 'standard' }) {
     setData((prev) => ({ ...prev, [field]: value }));
   }
 
-  function validateStep(current) {
-    if (current === 1) {
-      if (!data.businessName || !data.postcode || !data.contactName || !data.phone || !data.email) {
-        return 'Please fill in every field so we can get your review started.';
-      }
-    }
-    if (current === 2) {
-      if (!data.businessType || !data.energyType) {
-        return 'Please tell us your business type and energy type.';
-      }
+  function validate() {
+    if (
+      !data.businessName.trim() ||
+      !data.contactName.trim() ||
+      !data.postcode.trim() ||
+      !data.takeoverTiming ||
+      !data.energyType ||
+      !data.phone.trim()
+    ) {
+      return 'Please fill in every field so we can get your review started.';
     }
     return '';
   }
 
-  function nextStep() {
-    const validationError = validateStep(step);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError('');
-    sendEvent(EVENTS.FORM_STEP_COMPLETED, { step, variant });
-    setStep((s) => s + 1);
-  }
-
-  function prevStep() {
-    setError('');
-    setStep((s) => Math.max(1, s - 1));
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
-    const validationError = validateStep(1) || validateStep(2);
+    const validationError = validate();
     if (validationError) {
       setError(validationError);
       return;
@@ -173,23 +131,8 @@ export default function LeadForm({ variant = 'standard' }) {
     }, 300);
   }
 
-  const progressPercent = (step / 3) * 100;
-
   return (
     <div className="rounded-xl2 bg-white p-6 shadow-glow-teal sm:p-8">
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-navy-700">
-          <span>Step {step} of 3</span>
-          <span>{step === 3 ? 'Almost done!' : 'Free & takes under 2 minutes'}</span>
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-navy-100">
-          <div
-            className="h-full rounded-full bg-teal-500 transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit}>
         {/* Honeypot field - hidden from real visitors with CSS, but a
             bot filling in every field will fill this in too, marking
@@ -206,179 +149,75 @@ export default function LeadForm({ variant = 'standard' }) {
             onChange={(e) => setWebsite(e.target.value)}
           />
         </div>
-        {step === 1 && (
-          <fieldset className="space-y-4">
-            <legend className="mb-1 text-lg font-bold text-navy-900">
-              Tell us about your business
-            </legend>
-            <Field label="Business name">
-              <input
-                required
-                type="text"
-                value={data.businessName}
-                onChange={(e) => update('businessName', e.target.value)}
-                className="input"
-                placeholder="e.g. Acme Manufacturing Ltd"
-              />
-            </Field>
-            <Field label="Business postcode">
-              <input
-                required
-                type="text"
-                value={data.postcode}
-                onChange={(e) => update('postcode', e.target.value.toUpperCase())}
-                className="input"
-                placeholder="e.g. M1 1AE"
-              />
-            </Field>
-            <Field label="Contact name">
-              <input
-                required
-                type="text"
-                value={data.contactName}
-                onChange={(e) => update('contactName', e.target.value)}
-                className="input"
-                placeholder="Your full name"
-              />
-            </Field>
-            <Field label="Phone number">
-              <input
-                required
-                type="tel"
-                value={data.phone}
-                onChange={(e) => update('phone', e.target.value)}
-                className="input"
-                placeholder="07000 000000"
-              />
-            </Field>
-            <Field label="Business email">
-              <input
-                required
-                type="email"
-                value={data.email}
-                onChange={(e) => update('email', e.target.value)}
-                className="input"
-                placeholder="you@yourbusiness.co.uk"
-              />
-            </Field>
-          </fieldset>
-        )}
 
-        {step === 2 && (
-          <fieldset className="space-y-4">
-            <legend className="mb-1 text-lg font-bold text-navy-900">
-              About your energy needs
-            </legend>
-            <Field label="Business type">
-              <select
-                required
-                value={data.businessType}
-                onChange={(e) => update('businessType', e.target.value)}
-                className="input"
-              >
-                <option value="">Select business type</option>
-                {BUSINESS_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Electricity, gas, or both?">
-              <div className="grid grid-cols-3 gap-2">
-                {['Electricity', 'Gas', 'Both'].map((opt) => (
-                  <button
-                    type="button"
-                    key={opt}
-                    onClick={() => update('energyType', opt)}
-                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold transition ${
-                      data.energyType === opt
-                        ? 'border-teal-500 bg-teal-50 text-navy-900'
-                        : 'border-navy-100 text-navy-600 hover:border-navy-200'
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            <Field label="Approximate energy spend">
-              <select
-                value={data.spend}
-                onChange={(e) => update('spend', e.target.value)}
-                className="input"
-              >
-                <option value="">Select a range (optional)</option>
-                {SPEND_RANGES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Current supplier (if known)">
-              <input
-                type="text"
-                value={data.currentSupplier}
-                onChange={(e) => update('currentSupplier', e.target.value)}
-                className="input"
-                placeholder="e.g. British Gas, EDF, Octopus..."
-              />
-            </Field>
-            <Field label="Contract renewal / end date (if known)">
-              <input
-                type="date"
-                value={data.contractEndDate}
-                onChange={(e) => update('contractEndDate', e.target.value)}
-                className="input"
-              />
-            </Field>
-          </fieldset>
-        )}
+        <fieldset className="space-y-5">
+          <legend className="mb-1 text-lg font-bold text-navy-900">
+            Business Energy for Your New Premises
+          </legend>
+          <p className="text-sm text-navy-600">
+            Recently taken over a business premises? Let&apos;s explore your energy options.
+          </p>
 
-        {step === 3 && (
-          <fieldset className="space-y-4">
-            <legend className="mb-1 text-lg font-bold text-navy-900">
-              Just a few final details
-            </legend>
-            <Field label="Number of business sites">
-              <select
-                value={data.numberOfSites}
-                onChange={(e) => update('numberOfSites', e.target.value)}
-                className="input"
-              >
-                {['1', '2', '3', '4', '5', '6-10', '10+'].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Approximate annual consumption (kWh), if known">
-              <input
-                type="text"
-                value={data.annualConsumption}
-                onChange={(e) => update('annualConsumption', e.target.value)}
-                className="input"
-                placeholder="Optional - leave blank if unsure"
-              />
-            </Field>
-            <Field label="Best time to contact you">
-              <select
-                value={data.bestTimeToContact}
-                onChange={(e) => update('bestTimeToContact', e.target.value)}
-                className="input"
-              >
-                <option value="">Select a preference (optional)</option>
-                {CONTACT_TIMES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </fieldset>
-        )}
+          <Field label="Business name">
+            <input
+              required
+              type="text"
+              value={data.businessName}
+              onChange={(e) => update('businessName', e.target.value)}
+              className="input"
+              placeholder="e.g. Smith's Bakery"
+            />
+          </Field>
+
+          <Field label="Contact person">
+            <input
+              required
+              type="text"
+              value={data.contactName}
+              onChange={(e) => update('contactName', e.target.value)}
+              className="input"
+              placeholder="Your full name"
+            />
+          </Field>
+
+          <Field label="Business postcode">
+            <input
+              required
+              type="text"
+              value={data.postcode}
+              onChange={(e) => update('postcode', e.target.value.toUpperCase())}
+              className="input"
+              placeholder="e.g. M1 1AE"
+            />
+          </Field>
+
+          <RadioGroup
+            label="When did you take over the premises?"
+            name="takeoverTiming"
+            options={TAKEOVER_OPTIONS}
+            value={data.takeoverTiming}
+            onChange={(v) => update('takeoverTiming', v)}
+          />
+
+          <RadioGroup
+            label="Energy required"
+            name="energyType"
+            options={ENERGY_OPTIONS}
+            value={data.energyType}
+            onChange={(v) => update('energyType', v)}
+          />
+
+          <Field label="Contact telephone">
+            <input
+              required
+              type="tel"
+              value={data.phone}
+              onChange={(e) => update('phone', e.target.value)}
+              className="input"
+              placeholder="Your business contact number"
+            />
+          </Field>
+        </fieldset>
 
         {error && (
           <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">
@@ -386,36 +225,14 @@ export default function LeadForm({ variant = 'standard' }) {
           </p>
         )}
 
-        <div className="mt-6 flex items-center justify-between gap-3">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="rounded-lg px-4 py-3 text-sm font-semibold text-navy-600 hover:text-navy-900"
-            >
-              Back
-            </button>
-          ) : (
-            <span />
-          )}
-
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="flex-1 rounded-lg bg-navy-800 px-6 py-3 text-base font-bold text-white shadow-card transition hover:bg-navy-700 sm:flex-none"
-            >
-              Continue
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 rounded-lg bg-amber-500 px-6 py-3 text-base font-bold text-navy-950 shadow-card transition hover:bg-amber-400 disabled:opacity-60 sm:flex-none"
-            >
-              {submitting ? 'Submitting...' : 'GET MY FREE ENERGY REVIEW'}
-            </button>
-          )}
+        <div className="mt-6">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-lg bg-navy-800 px-6 py-3 text-base font-bold text-white shadow-card transition hover:bg-navy-700 disabled:opacity-60"
+          >
+            {submitting ? 'Submitting...' : 'Get my free energy review'}
+          </button>
         </div>
       </form>
 
@@ -433,5 +250,28 @@ function Field({ label, children }) {
       <span className="mb-1 block text-sm font-semibold text-navy-700">{label}</span>
       {children}
     </label>
+  );
+}
+
+function RadioGroup({ label, name, options, value, onChange }) {
+  return (
+    <fieldset>
+      <legend className="mb-2 block text-sm font-semibold text-navy-700">{label}</legend>
+      <div className="space-y-2">
+        {options.map((opt) => (
+          <label key={opt} className="flex cursor-pointer items-center gap-3 text-sm text-navy-800">
+            <input
+              type="radio"
+              name={name}
+              value={opt}
+              checked={value === opt}
+              onChange={() => onChange(opt)}
+              className="h-4 w-4 accent-teal-500"
+            />
+            <span>{opt}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
   );
 }
