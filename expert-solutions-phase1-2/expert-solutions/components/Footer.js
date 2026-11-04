@@ -113,13 +113,14 @@ export default function Footer() {
 
         <div className="mt-10 border-t border-navy-800 pt-6 text-xs leading-relaxed text-navy-400">
           <p>
-            Expert Solutions is a trading name of Stuart Leigh. Trading
-            Address: 21 Ackton Close, Stoke-on-Trent, ST3 6SB, England.
-            Expert Solutions is an independent energy broker and
-            intermediary for UK business (non-domestic) energy customers
-            only. We are not a direct energy supplier. &copy;{' '}
-            {new Date().getFullYear()} Expert Solutions. All rights
-            reserved.
+            Trading Address: 21 Ackton Close, Stoke-on-Trent, ST3 6SB,
+            England. Expertbridge Solutions is an independent energy
+            broker and intermediary for UK business (non-domestic) energy
+            customers only. We are not a direct energy supplier.
+          </p>
+          <p className="mt-2">
+            &copy; {new Date().getFullYear()} Expertbridge Solutions.
+            Expertbridge Solutions is a trading name of Veer Infotech.
           </p>
         </div>
       </div>
