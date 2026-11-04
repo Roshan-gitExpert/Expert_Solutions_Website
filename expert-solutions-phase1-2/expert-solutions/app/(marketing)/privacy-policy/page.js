@@ -67,7 +67,13 @@ export default function PrivacyPolicyPage() {
           <p>
               This site uses cookies and similar technologies - see our{' '}
             <a href="/cookie-policy" className="text-teal-600 underline">Cookie Policy</a>{' '}
-            for details.
+            for details. With your permission we use Google Analytics and
+            Google Ads to measure how the site is used and how our advertising
+            performs; this involves Google receiving information such as your
+            IP address and the pages you visit. We only do this if you allow
+            analytics or advertising cookies, and you can change your choice
+            at any time using "Cookie settings" in the page footer. Sending
+            an enquiry does not depend on these choices.
               </p>
 
         <h2 className="text-lg font-bold text-navy-900">Contact Us</h2>

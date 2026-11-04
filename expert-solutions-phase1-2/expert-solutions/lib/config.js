@@ -72,7 +72,7 @@ export const siteConfig = {
 
     // Analytics (optional - safe to leave blank)
     googleAdsId: process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || '',
-    ga4Id: process.env.NEXT_PUBLIC_GA4_ID || '',
+    ga4Id: process.env.NEXT_PUBLIC_GA4_ID || 'G-02H4Z5Q37M',
 
     // Opening hours - placeholder, edit freely
     openingHours: 'Monday - Friday, 9:00am - 5:30pm',

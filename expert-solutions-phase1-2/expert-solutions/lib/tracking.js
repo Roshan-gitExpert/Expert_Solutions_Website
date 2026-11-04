@@ -15,6 +15,8 @@
 // these two functions.
 // ============================================================
 
+import { hasConsent } from './consent';
+
 const ATTRIBUTION_KEY = 'es_attribution_v1';
 const SESSION_KEY = 'es_session_v1';
 const VISITOR_ID_KEY = 'es_visitor_id_v1';
@@ -25,6 +27,8 @@ const VISITOR_ID_KEY = 'es_visitor_id_v1';
 // Supabase table.
 export function getOrCreateVisitorId() {
   if (typeof window === 'undefined') return null;
+  // Persistent visitor id is non-essential: only with analytics consent.
+  if (!hasConsent('analytics')) return null;
   try {
     let id = window.localStorage.getItem(VISITOR_ID_KEY);
     if (!id) {
@@ -59,8 +63,30 @@ function safeParse(json) {
 
 // Captures gclid/utm params from the current URL. Call this once,
 // as early as possible, on every page load (done in app/layout.js).
+// In-memory fallback used while the visitor has not allowed
+// storage. Nothing is written to the device; the data lives only for
+// this page view so a submitted enquiry can still carry its source.
+let memAttribution = null;
+let memSession = null;
+
+function lsGet(key) {
+  try { return window.localStorage.getItem(key); } catch (e) { return null; }
+}
+function lsSet(key, value) {
+  try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+}
+function ssGet(key) {
+  try { return window.sessionStorage.getItem(key); } catch (e) { return null; }
+}
+function ssSet(key, value) {
+  try { window.sessionStorage.setItem(key, value); } catch (e) { /* ignore */ }
+}
+
 export function captureAttribution() {
   if (typeof window === 'undefined') return;
+
+  const canStoreAds = hasConsent('advertising');
+  const canStoreSession = hasConsent('analytics');
 
   const params = new URLSearchParams(window.location.search);
   const captured = {};
@@ -75,7 +101,8 @@ export function captureAttribution() {
   // FIRST TOUCH - the very first campaign/keyword that brought this
   // visitor to the site. Written once, never overwritten, so you can
   // always answer "which ad actually generated this lead?".
-  let attribution = safeParse(window.localStorage.getItem(ATTRIBUTION_KEY));
+  // Stored on the device only with advertising consent.
+  let attribution = (canStoreAds && safeParse(lsGet(ATTRIBUTION_KEY))) || memAttribution;
   if (!attribution) {
     attribution = {
       firstTouch: {
@@ -89,7 +116,6 @@ export function captureAttribution() {
         timestamp: now,
       },
     };
-    window.localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
   } else if (Object.keys(captured).length > 0) {
     // LAST TOUCH - updated whenever a NEW set of campaign params
     // shows up (e.g. the visitor clicked a second, different ad).
@@ -98,24 +124,25 @@ export function captureAttribution() {
       landingPage: currentPath,
       timestamp: now,
     };
-    window.localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
   }
+  memAttribution = attribution;
+  if (canStoreAds) lsSet(ATTRIBUTION_KEY, JSON.stringify(attribution));
 
   // SESSION - first page visited this browser session (tab open),
   // used for "first page visited" reporting separate from all-time
-  // first touch.
-  let session = safeParse(window.sessionStorage.getItem(SESSION_KEY));
+  // first touch. Stored only with analytics consent.
+  let session = (canStoreSession && safeParse(ssGet(SESSION_KEY))) || memSession;
   if (!session) {
     session = {
       firstPageThisSession: currentPath,
       sessionStarted: now,
       pagesViewed: [currentPath],
     };
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } else if (session.pagesViewed[session.pagesViewed.length - 1] !== currentPath) {
     session.pagesViewed.push(currentPath);
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
+  memSession = session;
+  if (canStoreSession) ssSet(SESSION_KEY, JSON.stringify(session));
 
   return attribution;
 }
@@ -126,8 +153,10 @@ export function captureAttribution() {
 // table).
 export function getAttribution() {
   if (typeof window === 'undefined') return null;
-  const attribution = safeParse(window.localStorage.getItem(ATTRIBUTION_KEY));
-  const session = safeParse(window.sessionStorage.getItem(SESSION_KEY));
+  const attribution =
+    (hasConsent('advertising') && safeParse(lsGet(ATTRIBUTION_KEY))) || memAttribution;
+  const session =
+    (hasConsent('analytics') && safeParse(ssGet(SESSION_KEY))) || memSession;
   return {
     ...attribution,
     session,
@@ -168,6 +197,17 @@ export function sendEvent(eventName, data = {}) {
             send_to: 'AW-18547421856/IpmfCMTUwbAdEKDljIxF',
         });
     }
+
+    // GA4 lead event (set up as a GA4 key event only - NOT imported
+    // into Google Ads as a second conversion). window.__esGa4Id is set
+    // by TrackingInit only on the real site hostname.
+    if (eventName === EVENTS.FORM_COMPLETED && typeof window.gtag === 'function' && window.__esGa4Id) {
+        window.gtag('event', 'generate_lead', { send_to: window.__esGa4Id });
+    }
+
+  // Our own event log needs the (consent-gated) visitor id; without
+  // analytics consent there is none, so nothing is sent.
+  if (!attribution || !attribution.visitorId) return;
 
   fetch('/api/events', {
     method: 'POST',

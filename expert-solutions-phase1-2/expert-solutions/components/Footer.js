@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import siteConfig from '@/lib/config';
+import CookieSettingsButton from '@/components/CookieSettingsButton';
 import {
   TRIGGER_PAGES,
   SECTORS,
@@ -120,7 +121,8 @@ export default function Footer() {
           </p>
           <p className="mt-2">
             &copy; {new Date().getFullYear()} Expert Bridge Solutions.
-            Expert Bridge Solutions is a trading name of Veer Infotech.
+            Expert Bridge Solutions is a trading name of Veer Infotech.{' '}
+            <CookieSettingsButton className="underline hover:text-teal-300" />
           </p>
         </div>
       </div>

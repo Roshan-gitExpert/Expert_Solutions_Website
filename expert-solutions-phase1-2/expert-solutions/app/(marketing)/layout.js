@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import StickyMobileBar from '@/components/StickyMobileBar';
 import TrackingInit from '@/components/TrackingInit';
+import ConsentBanner from '@/components/ConsentBanner';
 
 // This layout wraps every public marketing/PPC page (home + the
 // seven keyword landing pages + contact/legal pages) with the site
@@ -17,6 +18,7 @@ export default function MarketingLayout({ children }) {
       <main className="pb-16 lg:pb-0">{children}</main>
       <Footer />
       <StickyMobileBar />
+      <ConsentBanner />
     </>
   );
 }

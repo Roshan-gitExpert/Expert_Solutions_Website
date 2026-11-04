@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { captureAttribution, sendEvent, EVENTS } from '@/lib/tracking';
 import siteConfig from '@/lib/config';
+import { ensureGtag, gtagConsentState, readConsent } from '@/lib/consent';
 
 // Mounted once in app/layout.js. Handles the "meaningful events only"
 // tracking required in Phase 4's spec, kept minimal for Phase 1:
@@ -29,22 +30,37 @@ export default function TrackingInit() {
       sendEvent(EVENTS.TIME_ON_PAGE, { seconds: 30, path: window.location.pathname });
     }, 30000);
 
-    // Load Google Ads gtag.js only if an ID has been configured -
-    // safe to leave blank, nothing renders/loads if empty.
-    if (siteConfig.googleAdsId) {
+    // ONE Google tag loader (gtag.js) shared by Google Ads and GA4.
+    // Consent Mode v2 defaults are set BEFORE the tag loads: everything
+    // denied unless the visitor already chose otherwise. GA4 only runs
+    // on the real site hostname (not previews/localhost).
+    const adsId = siteConfig.googleAdsId;
+    const ga4Id = siteConfig.ga4Id;
+    const ga4Allowed =
+      Boolean(ga4Id) && /(^|\.)expertbridgesolutions\.co\.uk$/.test(window.location.hostname);
+    const loaderId = adsId || (ga4Allowed ? ga4Id : '');
+
+    if (loaderId && !window.__esGtagLoaded) {
+      window.__esGtagLoaded = true;
+      const gtag = ensureGtag();
+      gtag('consent', 'default', {
+        ...gtagConsentState(readConsent()),
+        wait_for_update: 500,
+      });
+      gtag('set', 'url_passthrough', true);
+      gtag('set', 'ads_data_redaction', true);
+
       const script = document.createElement('script');
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${siteConfig.googleAdsId}`;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${loaderId}`;
       script.async = true;
       document.head.appendChild(script);
 
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        // eslint-disable-next-line prefer-rest-params
-        window.dataLayer.push(arguments);
+      gtag('js', new Date());
+      if (adsId) gtag('config', adsId);
+      if (ga4Allowed) {
+        window.__esGa4Id = ga4Id;
+        gtag('config', ga4Id);
       }
-      window.gtag = window.gtag || gtag;
-      window.gtag('js', new Date());
-      window.gtag('config', siteConfig.googleAdsId);
     }
 
     return () => {
