@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { readConsent, saveConsent, CONSENT_OPEN_EVENT } from '@/lib/consent';
+import { readConsent, saveConsent, isConsentHost, CONSENT_OPEN_EVENT } from '@/lib/consent';
 import { captureAttribution } from '@/lib/tracking';
 
 // Cookie banner. Accept all / Reject all / Manage preferences carry
@@ -15,6 +15,7 @@ export default function ConsentBanner() {
   const [advertising, setAdvertising] = useState(false);
 
   useEffect(() => {
+    if (!isConsentHost()) return undefined; // not on www / other hosts
     const existing = readConsent();
     if (!existing) setOpen(true);
 

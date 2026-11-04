@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { captureAttribution, sendEvent, EVENTS } from '@/lib/tracking';
 import siteConfig from '@/lib/config';
-import { ensureGtag, gtagConsentState, readConsent } from '@/lib/consent';
+import { ensureGtag, gtagConsentState, readConsent, isGa4Host, isConsentHost } from '@/lib/consent';
 
 // Mounted once in app/layout.js. Handles the "meaningful events only"
 // tracking required in Phase 4's spec, kept minimal for Phase 1:
@@ -36,19 +36,21 @@ export default function TrackingInit() {
     // on the real site hostname (not previews/localhost).
     const adsId = siteConfig.googleAdsId;
     const ga4Id = siteConfig.ga4Id;
-    const ga4Allowed =
-      Boolean(ga4Id) && /(^|\.)expertbridgesolutions\.co\.uk$/.test(window.location.hostname);
+    // GA4: quote.expertbridgesolutions.co.uk ONLY (see lib/consent.js).
+    const ga4Allowed = Boolean(ga4Id) && isGa4Host();
     const loaderId = adsId || (ga4Allowed ? ga4Id : '');
 
     if (loaderId && !window.__esGtagLoaded) {
       window.__esGtagLoaded = true;
       const gtag = ensureGtag();
-      gtag('consent', 'default', {
-        ...gtagConsentState(readConsent()),
-        wait_for_update: 500,
-      });
-      gtag('set', 'url_passthrough', true);
-      gtag('set', 'ads_data_redaction', true);
+      if (isConsentHost()) {
+        gtag('consent', 'default', {
+          ...gtagConsentState(readConsent()),
+          wait_for_update: 500,
+        });
+        gtag('set', 'url_passthrough', true);
+        gtag('set', 'ads_data_redaction', true);
+      }
 
       const script = document.createElement('script');
       script.src = `https://www.googletagmanager.com/gtag/js?id=${loaderId}`;
