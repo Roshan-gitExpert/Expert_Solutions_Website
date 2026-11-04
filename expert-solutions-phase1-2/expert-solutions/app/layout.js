@@ -60,7 +60,7 @@ export default function RootLayout({ children }) {
           },
           areaServed: 'GB',
           description:
-                  'UK business and commercial energy comparison and brokerage service for electricity and gas. Expert Bridge Solutions is a trading name of Stuart Leigh, an independent energy broker and intermediary - not a direct energy supplier.',
+                  'UK business and commercial energy comparison and brokerage service for electricity and gas. Expert Bridge Solutions is a trading name of Veer Infotech, an independent energy broker and intermediary - not a direct energy supplier.',
     };
 
   const websiteSchema = {

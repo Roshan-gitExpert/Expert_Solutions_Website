@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
       <div className="prose-sm mt-8 space-y-6 text-navy-600">
               <p>
                 This privacy policy explains how Expert Bridge Solutions, a trading name
-            of Stuart Leigh (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
+            of Veer Infotech (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
           &ldquo;our&rdquo;), collects, uses and protects information
             submitted by visitors to this website. This service is intended
             for UK business (non-domestic) energy customers only.

@@ -15,7 +15,7 @@ export default function TermsPage() {
       <div className="prose-sm mt-8 space-y-6 text-navy-600">
               <p>
                 These terms and conditions govern your use of this website,
-                operated by Expert Bridge Solutions, a trading name of Stuart Leigh,
+                operated by Expert Bridge Solutions, a trading name of Veer Infotech,
                 trading from 21 Ackton Close, Stoke-on-Trent, ST3 6SB, England.
                 This website is intended for UK business (non-domestic) energy
             customers only.
