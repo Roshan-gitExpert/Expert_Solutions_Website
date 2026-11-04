@@ -75,7 +75,7 @@ const STANDING_CHARGE_LEVERS = [
 ];
 
 export const metadata = {
-  title: 'How to Reduce Restaurant Electricity Standing Charges | Expert Solutions',
+  title: 'How to Reduce Restaurant Electricity Standing Charges | Expert Bridge Solutions',
   description:
     'Practical, genuine ways UK restaurants and cafes can reduce business electricity standing charges and commercial kitchen gas rates - capacity, meter type, VAT and contract structure. Free, no-obligation review.',
   alternates: { canonical: '/sectors/restaurants' },

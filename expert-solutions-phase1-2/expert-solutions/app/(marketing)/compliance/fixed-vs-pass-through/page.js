@@ -35,7 +35,7 @@ const FIXED_VS_PASSTHROUGH_FAQS = [
 ];
 
 export const metadata = {
-  title: 'Fixed Rate vs Pass-Through Commercial Energy Explained | Expert Solutions',
+  title: 'Fixed Rate vs Pass-Through Commercial Energy Explained | Expert Bridge Solutions',
   description:
     'The real difference between a fully fixed and a pass-through (flexible) UK business energy contract - how each is priced, and which suits which type of business.',
   alternates: { canonical: '/compliance/fixed-vs-pass-through' },

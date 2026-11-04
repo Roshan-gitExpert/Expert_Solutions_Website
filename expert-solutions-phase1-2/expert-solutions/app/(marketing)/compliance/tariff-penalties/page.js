@@ -41,7 +41,7 @@ const TARIFF_PENALTY_FAQS = [
 ];
 
 export const metadata = {
-  title: 'UK Business Energy Out-of-Contract Tariff Penalties | Expert Solutions',
+  title: 'UK Business Energy Out-of-Contract Tariff Penalties | Expert Bridge Solutions',
   description:
     'What happens if your business energy contract lapses or rolls over - out-of-contract rates, rollover terms, notice periods, and how to avoid paying the penalty rate.',
   alternates: { canonical: '/compliance/tariff-penalties' },

@@ -16,7 +16,7 @@ export function generateMetadata({ params }) {
   const campaign = getCampaign(params.slug);
   if (!campaign) return {};
   return {
-    title: `${campaign.headline} | Expert Solutions`,
+    title: `${campaign.headline} | Expert Bridge Solutions`,
     description: campaign.subtitle,
     alternates: { canonical: `/campaign/${campaign.slug}` },
   };

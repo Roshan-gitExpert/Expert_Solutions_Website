@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
 
         <h1 className="mb-1 text-xl font-bold text-navy-900">Internal Sign In</h1>
         <p className="mb-6 text-sm text-navy-500">
-          For Expert Solutions staff only. If you don&apos;t have a login yet,
+          For Expert Bridge Solutions staff only. If you don&apos;t have a login yet,
           ask whoever set up your Supabase project to invite you.
         </p>
 

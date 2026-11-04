@@ -5,7 +5,7 @@ import siteConfig from '@/lib/config';
 export const metadata = {
     title: 'Contact Us | Speak to a UK Business Energy Specialist',
     description:
-          'Contact Expert Solutions to speak to a UK business energy specialist about your commercial electricity and gas options.',
+          'Contact Expert Bridge Solutions to speak to a UK business energy specialist about your commercial electricity and gas options.',
     alternates: { canonical: '/contact-us' },
 };
 

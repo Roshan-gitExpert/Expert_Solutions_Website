@@ -8,7 +8,7 @@ export const metadata = {
           template: `%s | ${siteConfig.companyName}`,
     },
     description:
-          'Compare UK business electricity and gas costs with Expert Solutions. Free, no-obligation commercial energy review for businesses across the UK.',
+          'Compare UK business electricity and gas costs with Expert Bridge Solutions. Free, no-obligation commercial energy review for businesses across the UK.',
     robots: { index: true, follow: true },
     openGraph: {
           siteName: siteConfig.companyName,
@@ -60,7 +60,7 @@ export default function RootLayout({ children }) {
           },
           areaServed: 'GB',
           description:
-                  'UK business and commercial energy comparison and brokerage service for electricity and gas. Expert Solutions is a trading name of Stuart Leigh, an independent energy broker and intermediary - not a direct energy supplier.',
+                  'UK business and commercial energy comparison and brokerage service for electricity and gas. Expert Bridge Solutions is a trading name of Stuart Leigh, an independent energy broker and intermediary - not a direct energy supplier.',
     };
 
   const websiteSchema = {

@@ -12,7 +12,7 @@ import { CORE_PAGES, SECTORS } from '@/lib/seoData';
 export const metadata = {
   title: 'Business Energy Broker | UK Commercial Energy Intermediary',
   description:
-    'What does a business energy broker do? Learn how Expert Solutions works as a UK commercial energy intermediary, and how we are paid.',
+    'What does a business energy broker do? Learn how Expert Bridge Solutions works as a UK commercial energy intermediary, and how we are paid.',
   alternates: { canonical: '/business-energy-broker' },
 };
 

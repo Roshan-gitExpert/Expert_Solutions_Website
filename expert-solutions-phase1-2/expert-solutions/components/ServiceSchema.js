@@ -2,7 +2,7 @@ import siteConfig from '@/lib/config';
 
 // Emits Service structured data for a genuine service page (not
 // used on trigger/sector/location pages, which are informational -
-// only on pages describing an actual service Expert Solutions
+// only on pages describing an actual service Expert Bridge Solutions
 // performs: comparing/arranging business electricity, gas, etc.)
 export default function ServiceSchema({ name, description, areaServed = 'GB' }) {
     const schema = {

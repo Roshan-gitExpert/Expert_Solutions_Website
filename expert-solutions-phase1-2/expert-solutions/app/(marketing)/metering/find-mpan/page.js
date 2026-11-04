@@ -40,7 +40,7 @@ const FIND_MPAN_FAQS = [
 ];
 
 export const metadata = {
-  title: 'How to Find Your Business MPAN Number Without a Bill | Expert Solutions',
+  title: 'How to Find Your Business MPAN Number Without a Bill | Expert Bridge Solutions',
   description:
     'What an MPAN actually is, how it differs from your gas MPRN, and every genuine way to look yours up without a copy of a bill to hand.',
   alternates: { canonical: '/metering/find-mpan' },

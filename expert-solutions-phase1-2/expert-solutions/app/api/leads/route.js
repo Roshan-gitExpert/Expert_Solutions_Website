@@ -9,7 +9,7 @@ async function sendLeadNotificationEmail(lead, leadId) {
   const to = process.env.LEAD_NOTIFY_TO;
   if (!apiKey || !to) return;
 
-  const from = process.env.LEAD_NOTIFY_FROM || 'Expert Solutions Leads <onboarding@resend.dev>';
+  const from = process.env.LEAD_NOTIFY_FROM || 'Expert Bridge Solutions Leads <onboarding@resend.dev>';
 
   const lines = [
     `Business: ${lead.businessName}`,

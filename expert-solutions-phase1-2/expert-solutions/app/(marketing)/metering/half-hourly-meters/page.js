@@ -42,7 +42,7 @@ const HALF_HOURLY_METER_FAQS = [
 ];
 
 export const metadata = {
-  title: 'Half-Hourly Meter Installation Commercial Property Guidelines | Expert Solutions',
+  title: 'Half-Hourly Meter Installation Commercial Property Guidelines | Expert Bridge Solutions',
   description:
     'What a half-hourly (HH) meter is, how Market-wide Half-Hourly Settlement (MHHS) affects commercial electricity meters, and the current UK rollout timeline.',
   alternates: { canonical: '/metering/half-hourly-meters' },

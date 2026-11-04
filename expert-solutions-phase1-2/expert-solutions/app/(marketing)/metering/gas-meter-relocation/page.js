@@ -41,7 +41,7 @@ const GAS_METER_RELOCATION_FAQS = [
 ];
 
 export const metadata = {
-  title: 'Cost of Moving a Commercial Gas Meter at UK Premises | Expert Solutions',
+  title: 'Cost of Moving a Commercial Gas Meter at UK Premises | Expert Bridge Solutions',
   description:
     'Who is responsible for relocating a commercial gas meter, the real process involved, and what actually drives the cost - no invented price, a genuine breakdown of the factors.',
   alternates: { canonical: '/metering/gas-meter-relocation' },

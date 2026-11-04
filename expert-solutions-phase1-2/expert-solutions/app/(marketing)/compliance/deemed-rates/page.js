@@ -45,7 +45,7 @@ const DEEMED_RATES_FAQS = [
 ];
 
 export const metadata = {
-  title: 'How to Avoid Deemed Energy Rates as a Micro Business | Expert Solutions',
+  title: 'How to Avoid Deemed Energy Rates as a Micro Business | Expert Bridge Solutions',
   description:
     'What a deemed business energy contract is, why deemed rates cost more, and the genuine Ofgem rules that let micro businesses avoid or escape them. Free, no-obligation review.',
   alternates: { canonical: '/compliance/deemed-rates' },

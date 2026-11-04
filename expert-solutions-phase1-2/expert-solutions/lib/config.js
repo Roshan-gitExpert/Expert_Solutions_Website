@@ -30,7 +30,7 @@ const phoneDisplay = process.env.NEXT_PUBLIC_PHONE_DISPLAY || '';
 const phoneTel = process.env.NEXT_PUBLIC_PHONE_TEL || '';
 
 export const siteConfig = {
-    companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || 'Expert Solutions',
+    companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || 'Expert Bridge Solutions',
     companyLegalName:
           process.env.NEXT_PUBLIC_COMPANY_LEGAL_NAME || 'Expert Solutions Ltd',
     companyNumber:

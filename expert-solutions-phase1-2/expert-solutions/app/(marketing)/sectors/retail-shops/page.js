@@ -42,7 +42,7 @@ const RETAIL_SHOP_BROKER_FAQS = [
 ];
 
 export const metadata = {
-  title: 'Commercial Electricity Broker for Small Retail Shops | Expert Solutions',
+  title: 'Commercial Electricity Broker for Small Retail Shops | Expert Bridge Solutions',
   description:
     'Independent commercial electricity broker helping small UK retail shops compare whole-of-market business electricity contracts. Free, no-obligation review.',
   alternates: { canonical: '/sectors/retail-shops' },
