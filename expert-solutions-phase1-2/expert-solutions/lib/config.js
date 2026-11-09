@@ -74,6 +74,11 @@ export const siteConfig = {
     googleAdsId: process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || '',
     ga4Id: process.env.NEXT_PUBLIC_GA4_ID || '',
 
+    // Microsoft Clarity project - confirmed real project ID (not a
+    // placeholder), covers all three hostnames via one shared snippet
+    // insertion in components/TrackingInit.js.
+    clarityProjectId: process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID || 'zate4o7rv2',
+
     // Opening hours - placeholder, edit freely
     openingHours: 'Monday - Friday, 9:00am - 5:30pm',
 };

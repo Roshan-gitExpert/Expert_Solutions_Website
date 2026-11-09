@@ -26,14 +26,34 @@ const initialData = {
   phone: '',
 };
 
+const QA_TOKEN_KEY = 'es_qa_token_v1';
+
 export default function LeadForm({ variant = 'standard' }) {
   const router = useRouter();
   const [data, setData] = useState(initialData);
   const [website, setWebsite] = useState(''); // honeypot - stays empty for real visitors
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [testModeNote, setTestModeNote] = useState(false);
   const hasStarted = useRef(false);
   const hasCompleted = useRef(false);
+
+  // A signed, admin-generated QA token (see app/api/admin/test-link
+  // and lib/testToken.js) can arrive as ?qa_token=... on any page of
+  // the funnel. It's captured into sessionStorage here so it survives
+  // navigation to wherever the lead form actually is, then sent with
+  // the submission below. The token itself proves nothing to the
+  // browser - only the server can verify it - so this is never a
+  // guessable "mark my own lead as a test" switch.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const incoming = params.get('qa_token');
+      if (incoming) window.sessionStorage.setItem(QA_TOKEN_KEY, incoming);
+    } catch (err) {
+      // ignore storage errors
+    }
+  }, []);
 
   useEffect(() => {
     function handleVisibility() {
@@ -83,6 +103,12 @@ export default function LeadForm({ variant = 'standard' }) {
 
     const attribution = getAttribution();
     const lead = { ...data, variant, sourceType: 'form' };
+    let qaToken = null;
+    try {
+      qaToken = window.sessionStorage.getItem(QA_TOKEN_KEY);
+    } catch (err) {
+      // ignore storage errors
+    }
 
     try {
       window.sessionStorage.setItem(
@@ -93,11 +119,12 @@ export default function LeadForm({ variant = 'standard' }) {
       // ignore storage errors
     }
 
+    let isTest = false;
     try {
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead, attribution, website }),
+        body: JSON.stringify({ lead, attribution, website, qaToken }),
       });
       const result = await res.json().catch(() => ({}));
 
@@ -115,6 +142,7 @@ export default function LeadForm({ variant = 'standard' }) {
           return;
         }
       }
+      isTest = Boolean(result.isTest);
     } catch (err) {
       setSubmitting(false);
       setError(
@@ -124,7 +152,16 @@ export default function LeadForm({ variant = 'standard' }) {
     }
 
     hasCompleted.current = true;
-    sendEvent(EVENTS.FORM_COMPLETED, { variant });
+    // The server - not this client - decided isTest, by verifying the
+    // signed QA token above. Only a confirmed real (non-test)
+    // completion fires the Google Ads conversion (see lib/tracking.js).
+    sendEvent(EVENTS.FORM_COMPLETED, { variant, isTest });
+
+    if (isTest) {
+      setTestModeNote(true);
+      setSubmitting(false);
+      return;
+    }
 
     setTimeout(() => {
       router.push('/thank-you');
@@ -132,7 +169,13 @@ export default function LeadForm({ variant = 'standard' }) {
   }
 
   return (
-    <div className="rounded-xl2 bg-white p-6 shadow-glow-teal sm:p-8">
+    <div className="rounded-xl2 bg-white p-6 shadow-glow-teal sm:p-8" data-clarity-mask="True">
+      {testModeNote && (
+        <p className="mb-4 rounded-lg bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800">
+          Test mode: this submission was saved and emailed as normal, but marked
+          as a test lead and excluded from Google Ads conversion tracking.
+        </p>
+      )}
       <form onSubmit={handleSubmit}>
         {/* Honeypot field - hidden from real visitors with CSS, but a
             bot filling in every field will fill this in too, marking

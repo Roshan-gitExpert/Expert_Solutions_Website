@@ -27,10 +27,13 @@ export default function PrivacyPolicyPage() {
             webchat, we may collect: your name, business name, phone number,
                         email address, postcode, business type, energy usage details,
                         current supplier information, and messages you send us. We also
-            collect technical information such as pages visited and
-            advertising click identifiers (for example, Google Click ID and
-            UTM campaign parameters) to understand which marketing channels
-            are effective.
+            automatically note, for every visit, an approximate location
+            (country/region/city - not a precise physical address) and
+            basic device/browser information from your connection; and,
+            only with your consent (see Cookies below), pages visited and
+            advertising click identifiers such as a Google Click ID and UTM
+            campaign parameters, to understand which marketing channels are
+            effective.
               </p>
 
         <h2 className="text-lg font-bold text-navy-900">How We Use Your Information</h2>
@@ -67,7 +70,14 @@ export default function PrivacyPolicyPage() {
           <p>
               This site uses cookies and similar technologies - see our{' '}
             <a href="/cookie-policy" className="text-teal-600 underline">Cookie Policy</a>{' '}
-            for details.
+            for details. With your permission we use Microsoft Clarity and
+            Google Ads measurement to understand how the site is used and
+            how our advertising performs; this may involve Google or
+            Microsoft receiving information such as your IP address and the
+            pages you visit. We only do this if you allow analytics or
+            advertising cookies, and you can change your choice at any time
+            using &ldquo;Cookie settings&rdquo; in the page footer. Sending
+            an enquiry never depends on these choices.
               </p>
 
         <h2 className="text-lg font-bold text-navy-900">Contact Us</h2>
