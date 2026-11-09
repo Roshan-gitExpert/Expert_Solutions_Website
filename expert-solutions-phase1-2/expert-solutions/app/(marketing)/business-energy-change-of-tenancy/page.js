@@ -53,6 +53,7 @@ export default function ChangeOfTenancyPage() {
         title="Business Energy Change of Tenancy (COT)"
         subtitle="Taking over a commercial lease? We help you register the change of tenancy and get your own energy contract in place."
         formVariant="change-of-tenancy"
+                  formMode="tenancy"
       />
       <TrustBar />
 
