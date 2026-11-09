@@ -135,6 +135,7 @@ export default function VisitsPage() {
             <tr>
               <th className="px-4 py-3">First Seen</th>
               <th className="px-4 py-3">Location</th>
+              <th className="px-4 py-3">IP Address</th>
               <th className="px-4 py-3">Device</th>
               <th className="px-4 py-3">Pages</th>
               <th className="px-4 py-3">Campaign / gclid</th>
@@ -145,14 +146,14 @@ export default function VisitsPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-navy-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-navy-400">
                   Loading visits...
                 </td>
               </tr>
             )}
             {!loading && visitors.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-navy-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-navy-400">
                   No visits recorded in this period.
                 </td>
               </tr>
@@ -168,6 +169,7 @@ export default function VisitsPage() {
                       {new Date(v.first_seen_at).toLocaleString('en-GB')}
                     </td>
                     <td className="px-4 py-3 text-navy-600">{location || 'Unknown'}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-navy-600">{v.ip_address || '-'}</td>
                     <td className="px-4 py-3 capitalize text-navy-600">
                       {v.device_type || '-'}
                       {v.browser ? <div className="text-xs text-navy-400">{v.browser} / {v.os}</div> : null}

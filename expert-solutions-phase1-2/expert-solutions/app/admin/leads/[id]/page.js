@@ -216,6 +216,7 @@ export default function LeadDetailPage() {
                         .filter(Boolean)
                         .join(', ') || 'Unknown',
                     ],
+                    ['IP address', visitor.ip_address || 'Unknown'],
                     ['Device', visitor.device_type],
                     ['Browser / OS', [visitor.browser, visitor.os].filter(Boolean).join(' / ')],
                     [
