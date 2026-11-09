@@ -13,6 +13,8 @@ export default function LeadDetailPage() {
   const [attribution, setAttribution] = useState(null);
   const [history, setHistory] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [visitor, setVisitor] = useState(null);
+  const [visitorEvents, setVisitorEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState(false);
   const [note, setNote] = useState('');
@@ -41,6 +43,26 @@ export default function LeadDetailPage() {
     setAttribution(attrRes.data || null);
     setHistory(historyRes.data || []);
     setAgents(agentsRes.data || []);
+
+    // Visitor journey - who they were (approx. location/device,
+    // consent choice) and what they did before this lead came in.
+    if (leadRes.data.visitor_id) {
+      const [visitorRes, eventsRes] = await Promise.all([
+        supabase.from('visitors').select('*').eq('id', leadRes.data.visitor_id).maybeSingle(),
+        supabase
+          .from('visitor_events')
+          .select('*')
+          .eq('visitor_id', leadRes.data.visitor_id)
+          .order('created_at', { ascending: true })
+          .limit(200),
+      ]);
+      setVisitor(visitorRes.data || null);
+      setVisitorEvents(eventsRes.data || []);
+    } else {
+      setVisitor(null);
+      setVisitorEvents([]);
+    }
+
     setLoading(false);
   }
 
@@ -112,6 +134,11 @@ export default function LeadDetailPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-navy-900">
             {lead.business_name || lead.contact_name}
+            {lead.is_test && (
+              <span className="ml-2 align-middle rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold uppercase text-amber-700">
+                Test lead
+              </span>
+            )}
           </h1>
           <p className="text-sm text-navy-500">
             Submitted {new Date(lead.created_at).toLocaleString('en-GB')} via{' '}
@@ -173,11 +200,56 @@ export default function LeadDetailPage() {
             )}
           </Card>
 
-          <Card title="Pages Visited, Engagement Score & Chat History">
-            <p className="text-sm text-navy-400">
-              Coming in Phase 3 / Phase 4 - visitor page-by-page journey,
-              engagement scoring, and live chat transcripts will appear here
-              once those phases are built.
+          <Card title="Visitor Journey">
+            {!visitor ? (
+              <p className="text-sm text-navy-400">
+                No linked visitor record for this lead (submitted without a
+                tracked browser session, or before visitor tracking was added).
+              </p>
+            ) : (
+              <>
+                <DetailGrid
+                  items={[
+                    [
+                      'Approx. location',
+                      [visitor.geo_city, visitor.geo_region, visitor.geo_country]
+                        .filter(Boolean)
+                        .join(', ') || 'Unknown',
+                    ],
+                    ['Device', visitor.device_type],
+                    ['Browser / OS', [visitor.browser, visitor.os].filter(Boolean).join(' / ')],
+                    [
+                      'Consent given',
+                      visitor.analytics_consent == null
+                        ? 'Not recorded'
+                        : `Analytics ${visitor.analytics_consent ? 'yes' : 'no'}, Advertising ${visitor.ads_consent ? 'yes' : 'no'}`,
+                    ],
+                    ['First seen', visitor.first_seen_at ? new Date(visitor.first_seen_at).toLocaleString('en-GB') : '-'],
+                    ['Pages viewed this session', Array.isArray(visitor.pages_viewed) ? visitor.pages_viewed.join(' -> ') : '-'],
+                  ]}
+                />
+                <h3 className="mb-2 mt-4 text-xs font-bold uppercase tracking-wide text-navy-400">
+                  Event timeline
+                </h3>
+                {visitorEvents.length === 0 ? (
+                  <p className="text-sm text-navy-400">No events recorded for this visitor.</p>
+                ) : (
+                  <ul className="max-h-64 space-y-1.5 overflow-y-auto text-sm">
+                    {visitorEvents.map((ev) => (
+                      <li key={ev.id} className="flex justify-between gap-3 border-b border-navy-50 pb-1 last:border-0">
+                        <span className="text-navy-700">{ev.event_name}{ev.path ? ` (${ev.path})` : ''}</span>
+                        <span className="whitespace-nowrap text-xs text-navy-400">
+                          {new Date(ev.created_at).toLocaleTimeString('en-GB')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+            <p className="mt-3 text-xs text-navy-400">
+              Live chat transcripts will appear here once Phase 3&apos;s chat
+              widget is built.
             </p>
           </Card>
 

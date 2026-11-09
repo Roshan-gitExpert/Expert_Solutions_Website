@@ -85,6 +85,9 @@ export default function AdminLayout({ children }) {
               <Link href="/admin" className="text-sm font-semibold text-navy-600 hover:text-navy-900">
                 Dashboard
               </Link>
+              <Link href="/admin/visits" className="text-sm font-semibold text-navy-600 hover:text-navy-900">
+                Visits
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">

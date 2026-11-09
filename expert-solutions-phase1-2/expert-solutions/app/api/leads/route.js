@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { verifyTestToken } from '@/lib/testToken';
+import { getClientContext } from '@/lib/requestContext';
 
 // Emails a quick notification to the inbox in LEAD_NOTIFY_TO whenever a
 // new lead comes in, using Resend. Safe to call even if Resend isn't
@@ -66,6 +68,14 @@ export async function POST(request) {
   const lead = body && body.lead;
   const attribution = (body && body.attribution) || {};
 
+  // Secure test-lead exclusion: a signed, short-lived, admin-generated
+  // token (see lib/testToken.js and app/api/admin/test-link/route.js) -
+  // NEVER a guessable public URL flag. Verified here, server-side,
+  // with a secret the client never sees. Any missing/invalid/expired
+  // token fails safe to isTest = false (a real lead).
+  const { valid: isTest } = verifyTestToken(body && body.qaToken);
+  const clientContext = getClientContext(request);
+
   if (!lead || !lead.businessName || !lead.contactName || !lead.phone) {
     return NextResponse.json({ ok: false, reason: 'missing_fields' }, { status: 400 });
   }
@@ -100,6 +110,14 @@ export async function POST(request) {
           last_utm_content: lastTouch.utm_content || null,
           pages_viewed: session.pagesViewed || [],
           last_seen_at: new Date().toISOString(),
+          ip_address: clientContext.ip,
+          geo_country: clientContext.country,
+          geo_region: clientContext.region,
+          geo_city: clientContext.city,
+          user_agent: clientContext.userAgent,
+          device_type: clientContext.deviceType,
+          browser: clientContext.browser,
+          os: clientContext.os,
         },
         { onConflict: 'id', ignoreDuplicates: false }
       );
@@ -123,6 +141,7 @@ export async function POST(request) {
       annual_consumption: lead.annualConsumption || null,
       best_time_to_contact: lead.bestTimeToContact || null,
       status: 'NEW',
+      is_test: isTest,
     };
 
     // takeover_timing is a newer column. Try with it first; if the
@@ -138,6 +157,17 @@ export async function POST(request) {
       ({ data: insertedLead, error: leadError } = await supabase
         .from('leads')
         .insert(leadRow)
+        .select()
+        .single());
+    }
+
+    // Older Supabase schemas (before this change) won't have is_test
+    // yet - retry without it rather than losing the lead.
+    if (leadError && /is_test/i.test(leadError.message || '')) {
+      const { is_test, ...rowWithoutIsTest } = leadRow;
+      ({ data: insertedLead, error: leadError } = await supabase
+        .from('leads')
+        .insert({ ...rowWithoutIsTest, takeover_timing: lead.takeoverTiming || null })
         .select()
         .single());
     }
@@ -165,9 +195,12 @@ export async function POST(request) {
       conversion_page: attribution.conversionPage || null,
     });
 
-await sendLeadNotificationEmail(lead, insertedLead.id);
-    
-    return NextResponse.json({ ok: true, leadId: insertedLead.id });
+// Test submissions still save, email and notify exactly like a real
+    // lead (so QA can see the full flow) - only the Google Ads
+    // conversion fire is suppressed, client-side, based on isTest below.
+    await sendLeadNotificationEmail(lead, insertedLead.id);
+
+    return NextResponse.json({ ok: true, leadId: insertedLead.id, isTest });
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[api/leads] failed to write to Supabase', err);

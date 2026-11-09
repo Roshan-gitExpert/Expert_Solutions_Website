@@ -26,6 +26,10 @@ export default function AdminDashboardPage() {
   const [dateTo, setDateTo] = useState(todayIso());
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [campaignFilter, setCampaignFilter] = useState('');
+  const [hideTestLeads, setHideTestLeads] = useState(true);
+  const [qaLink, setQaLink] = useState(null);
+  const [qaLinkError, setQaLinkError] = useState('');
+  const [generatingQaLink, setGeneratingQaLink] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -43,8 +47,9 @@ export default function AdminDashboardPage() {
       .limit(500);
 
     if (statusFilter !== 'ALL') query = query.eq('status', statusFilter);
+    if (hideTestLeads) query = query.eq('is_test', false);
 
-    const [leadsRes, agentsRes, visitorsRes] = await Promise.all([
+    let [leadsRes, agentsRes, visitorsRes] = await Promise.all([
       query,
       supabase.from('users').select('id, full_name, role'),
       supabase
@@ -53,6 +58,21 @@ export default function AdminDashboardPage() {
         .gte('first_seen_at', fromIso)
         .lte('first_seen_at', toIso),
     ]);
+
+    // is_test is a new column (supabase/add_consent_geo_device_test_fields.sql).
+    // Until that migration has been run, fall back to showing every
+    // lead rather than erroring the whole dashboard out.
+    if (leadsRes.error && /is_test/i.test(leadsRes.error.message || '')) {
+      let fallbackQuery = supabase
+        .from('leads')
+        .select('*')
+        .gte('created_at', fromIso)
+        .lte('created_at', toIso)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (statusFilter !== 'ALL') fallbackQuery = fallbackQuery.eq('status', statusFilter);
+      leadsRes = await fallbackQuery;
+    }
 
     if (leadsRes.error) {
       setErrorMsg(leadsRes.error.message);
@@ -136,6 +156,38 @@ export default function AdminDashboardPage() {
     return agent ? agent.full_name : 'Unknown';
   }
 
+  // Generates a signed, ~1-hour QA test link (see
+  // app/api/admin/test-link/route.js + lib/testToken.js). Requires
+  // the current logged-in admin session - never usable by a signed-
+  // out visitor, and never a bare guessable URL flag.
+  async function generateQaLink() {
+    setGeneratingQaLink(true);
+    setQaLinkError('');
+    setQaLink(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      const res = await fetch('/api/admin/test-link', {
+        method: 'POST',
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) {
+        setQaLinkError(
+          result.reason === 'test_token_not_configured'
+            ? 'TEST_LEAD_TOKEN_SECRET is not set on the server yet - add it in Vercel, then try again.'
+            : 'Could not generate a test link. Make sure you are logged in and try again.'
+        );
+      } else {
+        setQaLink(result);
+      }
+    } catch (err) {
+      setQaLinkError('Could not generate a test link. Please try again.');
+    } finally {
+      setGeneratingQaLink(false);
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -144,6 +196,30 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-navy-500">
             Live view of every enquiry submitted through the website.
           </p>
+        </div>
+        <div className="text-right">
+          <button
+            type="button"
+            onClick={generateQaLink}
+            disabled={generatingQaLink}
+            className="rounded-lg border border-navy-200 px-3 py-1.5 text-sm font-semibold text-navy-600 hover:bg-navy-50 disabled:opacity-60"
+          >
+            {generatingQaLink ? 'Generating...' : 'Generate QA test link'}
+          </button>
+          {qaLink && (
+            <div className="mt-2 max-w-sm rounded-lg bg-teal-50 p-3 text-left text-xs text-navy-700">
+              <p className="font-semibold">Valid for 1 hour - open it, submit the form, it won&apos;t count as a real lead or Google Ads conversion:</p>
+              <input
+                readOnly
+                value={qaLink.url}
+                onFocus={(e) => e.target.select()}
+                className="input mt-1 !w-full text-xs"
+              />
+            </div>
+          )}
+          {qaLinkError && (
+            <p className="mt-2 max-w-sm text-left text-xs text-red-600">{qaLinkError}</p>
+          )}
         </div>
       </div>
 
@@ -209,6 +285,15 @@ export default function AdminDashboardPage() {
               className="input !w-64"
             />
           </label>
+          <label className="flex items-center gap-2 text-sm font-semibold text-navy-600">
+            <input
+              type="checkbox"
+              checked={hideTestLeads}
+              onChange={(e) => setHideTestLeads(e.target.checked)}
+              className="h-4 w-4"
+            />
+            Hide test leads
+          </label>
           <div className="ml-auto text-sm text-navy-500">
             {conversionRate !== null ? (
               <span>
@@ -262,6 +347,11 @@ export default function AdminDashboardPage() {
                       <Link href={`/admin/leads/${lead.id}`} className="font-semibold text-navy-900 hover:underline">
                         {lead.business_name || lead.contact_name || 'Unnamed lead'}
                       </Link>
+                      {lead.is_test && (
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">
+                          Test
+                        </span>
+                      )}
                       <div className="text-xs text-navy-400">{lead.contact_name} - {lead.phone}</div>
                     </td>
                     <td className="px-4 py-3 capitalize text-navy-600">{lead.source_type}</td>

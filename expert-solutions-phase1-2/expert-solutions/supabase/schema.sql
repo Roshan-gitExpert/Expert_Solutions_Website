@@ -49,7 +49,23 @@ create table if not exists public.visitors (
   last_utm_content text,
   pages_viewed jsonb not null default '[]'::jsonb,
   first_seen_at timestamptz not null default now(),
-  last_seen_at timestamptz not null default now()
+  last_seen_at timestamptz not null default now(),
+  -- Cookie consent choice (set once, by a visitor who has already
+  -- granted analytics consent - see lib/consent.js).
+  analytics_consent boolean,
+  ads_consent boolean,
+  consent_updated_at timestamptz,
+  -- Approximate IP/location (from Vercel's own request headers, never
+  -- a precise physical address) + device/browser/OS. Admin-only via
+  -- RLS below; never returned by any public API.
+  ip_address text,
+  geo_country text,
+  geo_region text,
+  geo_city text,
+  user_agent text,
+  device_type text,
+  browser text,
+  os text
 );
 
 -- ------------------------------------------------------------
@@ -93,12 +109,17 @@ create table if not exists public.leads (
   ),
   assigned_agent uuid references public.users(id) on delete set null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- Secure test-lead exclusion flag - set server-side only, after
+  -- verifying a signed admin-generated QA token. Never settable by a
+  -- public URL parameter alone. See lib/testToken.js.
+  is_test boolean not null default false
 );
 
 create index if not exists leads_status_idx on public.leads(status);
 create index if not exists leads_created_at_idx on public.leads(created_at);
 create index if not exists leads_assigned_agent_idx on public.leads(assigned_agent);
+create index if not exists leads_is_test_idx on public.leads(is_test);
 
 -- Keep updated_at current whenever a lead row changes.
 create or replace function public.set_updated_at()
