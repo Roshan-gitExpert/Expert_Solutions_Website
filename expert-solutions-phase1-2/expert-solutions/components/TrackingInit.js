@@ -10,6 +10,15 @@ import siteConfig from '@/lib/config';
 // loads Google Ads + Microsoft Clarity under Consent Mode v2.
 export default function TrackingInit() {
   useEffect(() => {
+    // Automated/headless browsers (Playwright, Selenium, Puppeteer, etc.)
+    // identify themselves via navigator.webdriver. We keep our own
+    // visitor/lead tracking (sendEvent -> /api/events, the lead form,
+    // and the leads API) fully intact for these sessions - only the
+    // third-party analytics/ad scripts below (Clarity, GA, Google Ads)
+    // are skipped, so automated QA/testing traffic never reaches them.
+    const isAutomatedBrowser =
+      typeof navigator !== 'undefined' && navigator.webdriver === true;
+
     // Consent Mode v2 defaults MUST be set before gtag.js (and Clarity,
     // which reads the same signals) load - "deny everything unless the
     // visitor already told us otherwise" is the whole point of Consent
@@ -42,7 +51,7 @@ export default function TrackingInit() {
 
     // Google Ads gtag.js - only if an ID has been configured. Consent
     // defaults are already set above, before this script is appended.
-    if (siteConfig.googleAdsId && !window.__esGtagLoaded) {
+    if (siteConfig.googleAdsId && !window.__esGtagLoaded && !isAutomatedBrowser) {
       window.__esGtagLoaded = true;
       const script = document.createElement('script');
       script.src = `https://www.googletagmanager.com/gtag/js?id=${siteConfig.googleAdsId}`;
@@ -60,7 +69,7 @@ export default function TrackingInit() {
     // since that would just duplicate what the GCM auto-read already
     // does. Same project id covers all three hostnames via this one
     // shared root-of-marketing-layout insertion.
-    if (siteConfig.clarityProjectId && !window.__esClarityLoaded) {
+    if (siteConfig.clarityProjectId && !window.__esClarityLoaded && !isAutomatedBrowser) {
       window.__esClarityLoaded = true;
       /* eslint-disable */
       (function (c, l, a, r, i, t, y) {
