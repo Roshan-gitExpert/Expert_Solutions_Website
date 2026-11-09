@@ -53,6 +53,7 @@ export default function NewPremisesPage() {
         title="Setting Up Business Energy at a New Premises"
         subtitle="Moving your business into a new site? Get your electricity and gas set up correctly from day one - and avoid an expensive deemed rate."
         formVariant="new-premises"
+                  formMode="tenancy"
       />
       <TrustBar />
 
