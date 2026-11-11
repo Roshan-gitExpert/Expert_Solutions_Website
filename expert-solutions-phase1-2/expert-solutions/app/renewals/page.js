@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import TrackingInit from '@/components/TrackingInit';
 import ConsentBanner from '@/components/ConsentBanner';
 import { sendEvent, getAttribution, EVENTS } from '@/lib/tracking';
+import siteConfig from '@/lib/config';
 
 // Standalone landing page for renewals.expertbridgesolutions.co.uk
 // (served at /renewals, same deployment as www./quote.*).
@@ -331,6 +332,31 @@ export default function RenewalsPage() {
             <p className="mt-4 text-center text-xs text-navy-400">
               No obligation. A UK-based energy specialist will contact you to
               discuss your options.
+            </p>
+          </div>
+
+          {/* Trust/legal footer - identical wording to components/Footer.js,
+              which every other page on the site uses. This page intentionally
+              has no header/nav (it's a standalone PPC landing page), but a
+              page carrying paid ad traffic should still identify the company
+              and disclose the broker relationship, same as the rest of the
+              site does. Does not touch the form above in any way. */}
+          <div className="mt-6 text-center text-xs leading-relaxed text-navy-400">
+            <p>
+              {siteConfig.companyName} is a trading name of Veer Infotech, an
+              independent energy broker and intermediary for UK business
+              (non-domestic) energy customers only. We are not a direct
+              energy supplier.
+            </p>
+            <p className="mt-2">
+              Trading Address: 21 Ackton Close, Stoke-on-Trent, ST3 6SB,
+              England. Email:{' '}
+              <a
+                href={`mailto:${siteConfig.companyEmail}`}
+                className="underline hover:text-teal-300"
+              >
+                {siteConfig.companyEmail}
+              </a>
             </p>
           </div>
         </div>
