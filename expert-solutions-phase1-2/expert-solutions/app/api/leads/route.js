@@ -1,7 +1,49 @@
+import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { verifyTestToken } from '@/lib/testToken';
 import { getClientContext } from '@/lib/requestContext';
+
+// reCAPTCHA v3 - invisible to real visitors, no checkbox/puzzle, no
+// change to any form. Verifies the token the browser attached (see
+// components/LeadForm.js / app/renewals/page.js). Fails OPEN (treats as
+// passed) whenever RECAPTCHA_SECRET_KEY isn't configured yet, or on any
+// network/parse error, so a misconfigured or not-yet-set-up key can
+// never block a real submission.
+async function passesRecaptcha(token) {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) return true;
+  if (!token) return false; // key is configured but browser sent nothing - suspicious
+  try {
+    const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token }),
+    });
+    const data = await res.json();
+    if (!data.success) return false;
+    // v3 returns a 0.0-1.0 score; undefined score (older key types) passes.
+    return typeof data.score !== 'number' || data.score >= 0.5;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[api/leads] reCAPTCHA verification request failed', err);
+    return true; // network hiccup - never block a real visitor over this
+  }
+}
+
+// Loose, deliberately forgiving checks - just enough to catch obvious
+// garbage ("tfgffg" / "HJRTGJTYGTR") without rejecting real, oddly
+// formatted UK details. Never touches the form itself - only decides
+// whether the server accepts the submission.
+function looksLikeRealPostcode(postcode) {
+  if (!postcode) return true; // optional on some variants - not this check's job
+  return /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/.test(postcode.trim());
+}
+
+function looksLikeRealPhone(phone) {
+  if (!phone) return true;
+  return (phone.match(/\d/g) || []).length >= 7;
+}
 
 // Emails a quick notification to the inbox in LEAD_NOTIFY_TO whenever a
 // new lead comes in, using Resend. Safe to call even if Resend isn't
@@ -80,6 +122,19 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, reason: 'missing_fields' }, { status: 400 });
   }
 
+  // Obvious-garbage check (e.g. "tfgffg" / "HJRTGJTYGTR") - skipped for
+  // verified test submissions so QA fixtures never get blocked.
+  if (!isTest && (!looksLikeRealPhone(lead.phone) || !looksLikeRealPostcode(lead.postcode))) {
+    return NextResponse.json({ ok: false, reason: 'invalid_details' }, { status: 400 });
+  }
+
+  // reCAPTCHA v3 - same "pretend success, don't write to the database"
+  // handling as the honeypot above, so a script never learns it was
+  // caught. Skipped for verified test submissions.
+  if (!isTest && !(await passesRecaptcha(body && body.recaptchaToken))) {
+    return NextResponse.json({ ok: true });
+  }
+
   if (!isSupabaseAdminConfigured) {
     return NextResponse.json({ ok: false, reason: 'not_configured' }, { status: 200 });
   }
@@ -89,11 +144,20 @@ export async function POST(request) {
   const lastTouch = attribution.lastTouch || {};
   const session = attribution.session || {};
 
+  // Always resolve to a real visitor id, even if the browser didn't send
+  // one (e.g. a submission that bypassed the page's own tracking JS
+  // entirely). This guarantees the IP/geo this request actually read
+  // above gets saved somewhere, instead of being silently discarded -
+  // previously a submission with no client-sent visitorId stored no
+  // visitor row and no IP at all, which is exactly what let one bot
+  // submission through with zero trace. Uses the SAME visitors table/
+  // columns as before - no schema change.
+  const visitorId = attribution.visitorId || randomUUID();
+
   try {
-    if (attribution.visitorId) {
-      await supabase.from('visitors').upsert(
+    await supabase.from('visitors').upsert(
         {
-          id: attribution.visitorId,
+          id: visitorId,
           first_landing_page: firstTouch.landingPage || null,
           first_gclid: firstTouch.gclid || null,
           first_utm_source: firstTouch.utm_source || null,
@@ -121,10 +185,9 @@ export async function POST(request) {
         },
         { onConflict: 'id', ignoreDuplicates: false }
       );
-    }
 
     const leadRow = {
-      visitor_id: attribution.visitorId || null,
+      visitor_id: visitorId,
       source_type: lead.sourceType || 'form',
       landing_page_variant: lead.variant || null,
       business_name: lead.businessName,
@@ -183,7 +246,7 @@ export async function POST(request) {
 
     await supabase.from('campaign_attribution').insert({
       lead_id: insertedLead.id,
-      visitor_id: attribution.visitorId || null,
+      visitor_id: visitorId,
       gclid: lastTouch.gclid || firstTouch.gclid || null,
       utm_source: lastTouch.utm_source || firstTouch.utm_source || null,
       utm_medium: lastTouch.utm_medium || firstTouch.utm_medium || null,

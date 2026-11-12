@@ -74,6 +74,14 @@ export const siteConfig = {
     googleAdsId: process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || '',
     ga4Id: process.env.NEXT_PUBLIC_GA4_ID || '',
 
+    // reCAPTCHA v3 (optional - safe to leave blank). Invisible bot check
+    // on lead forms. Site key is public (safe in client bundle); the
+    // matching secret key lives server-side only, as RECAPTCHA_SECRET_KEY
+    // in Vercel env vars, read directly in app/api/leads/route.js - never
+    // exposed here. Both forms/the API route no-op gracefully until a
+    // real key pair is configured (see recaptcha.google.com/admin).
+    recaptchaSiteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
+
     // Microsoft Clarity project - confirmed real project ID (not a
     // placeholder), covers all three hostnames via one shared snippet
     // insertion in components/TrackingInit.js.
