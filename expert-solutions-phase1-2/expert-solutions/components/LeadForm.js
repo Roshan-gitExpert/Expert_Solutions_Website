@@ -2,7 +2,31 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 import { sendEvent, getAttribution, EVENTS } from '@/lib/tracking';
+import siteConfig from '@/lib/config';
+
+// reCAPTCHA v3 - invisible, no checkbox/puzzle, no change to the form
+// itself. Runs only once a real site key is configured
+// (NEXT_PUBLIC_RECAPTCHA_SITE_KEY); until then this resolves to null and
+// the submission proceeds exactly as it does today.
+async function getRecaptchaToken() {
+    if (!siteConfig.recaptchaSiteKey || typeof window === 'undefined' || !window.grecaptcha) {
+          return null;
+    }
+    try {
+          return await new Promise((resolve) => {
+                  window.grecaptcha.ready(() => {
+                              window.grecaptcha
+                                            .execute(siteConfig.recaptchaSiteKey, { action: 'lead_submit' })
+                            .then(resolve)
+                            .catch(() => resolve(null));
+                  });
+          });
+    } catch (err) {
+          return null;
+    }
+}
 
 const TAKEOVER_OPTIONS = [
     'Already moved in',
@@ -135,6 +159,7 @@ async function handleSubmit(e) {
       } catch (err) {
               // ignore storage errors
       }
+      const recaptchaToken = await getRecaptchaToken();
 
       try {
               window.sessionStorage.setItem(
@@ -150,7 +175,7 @@ async function handleSubmit(e) {
               const res = await fetch('/api/leads', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lead, attribution, website, qaToken }),
+                        body: JSON.stringify({ lead, attribution, website, qaToken, recaptchaToken }),
               });
               const result = await res.json().catch(() => ({}));
 
@@ -160,6 +185,12 @@ async function handleSubmit(e) {
               // still count the conversion and let them through.
               // eslint-disable-next-line no-console
               console.warn('[lead] Supabase not configured yet - lead was not stored.');
+            } else if (result.reason === 'invalid_details') {
+                        setSubmitting(false);
+                        setError(
+                                      'A couple of details don’t look quite right - please double-check your phone number and postcode and try again.'
+                                    );
+                        return;
             } else {
                         setSubmitting(false);
                         setError(
@@ -195,6 +226,13 @@ async function handleSubmit(e) {
 }
 
 return (
+      <>
+      {siteConfig.recaptchaSiteKey && (
+            <Script
+                  src={`https://www.google.com/recaptcha/api.js?render=${siteConfig.recaptchaSiteKey}`}
+                  strategy="afterInteractive"
+            />
+      )}
       <div className="rounded-xl2 bg-white p-6 shadow-glow-teal sm:p-8" data-clarity-mask="True">
 {testModeNote && (
           <p className="mb-4 rounded-lg bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800">
@@ -415,6 +453,7 @@ return (
         discuss your options.
           </p>
           </div>
+      </>
   );
 }
 
