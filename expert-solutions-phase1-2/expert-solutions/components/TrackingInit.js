@@ -33,6 +33,40 @@ export default function TrackingInit() {
     captureAttribution();
     sendEvent(EVENTS.LANDING_PAGE_VIEWED, { path: window.location.pathname });
 
+    // Ad-click IP/geo capture - independent of cookie consent (see
+    // app/api/track-visit/route.js for why). Scoped deliberately to
+    // only the two PPC destinations this was built for: the
+    // quote.expertbridgesolutions.co.uk domain and /renewals. Only
+    // fires when the URL actually has a gclid, i.e. a real ad click -
+    // never for ordinary organic/direct visits, and never more than
+    // once per page load.
+    try {
+      const host = window.location.hostname;
+      const path = window.location.pathname;
+      const isTrackedDestination = host.includes('quote.expertbridgesolutions.co.uk') || path === '/renewals';
+      const gclid = new URLSearchParams(window.location.search).get('gclid');
+      if (isTrackedDestination && gclid && !window.__esAdVisitLogged) {
+        window.__esAdVisitLogged = true;
+        const params = new URLSearchParams(window.location.search);
+        fetch('/api/track-visit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gclid,
+            utm_source: params.get('utm_source'),
+            utm_medium: params.get('utm_medium'),
+            utm_campaign: params.get('utm_campaign'),
+            utm_term: params.get('utm_term'),
+            utm_content: params.get('utm_content'),
+            landingPage: path,
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch (e) {
+      // never let this break the page
+    }
+
     let scrollFired = false;
     function onScroll() {
       if (scrollFired) return;
