@@ -1,5 +1,6 @@
 import './globals.css';
 import siteConfig from '@/lib/config';
+import LiveChat from '@/components/LiveChat';
 
 export const metadata = {
     metadataBase: new URL(siteConfig.siteUrl),
@@ -85,6 +86,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
 {children}
+<LiveChat />
 </body>
   </html>
   );
