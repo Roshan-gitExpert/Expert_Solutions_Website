@@ -1,6 +1,7 @@
 import './globals.css';
 import siteConfig from '@/lib/config';
 import LiveChat from '@/components/LiveChat';
+import LeadfeederTracker from '@/components/LeadfeederTracker';
 
 export const metadata = {
     metadataBase: new URL(siteConfig.siteUrl),
@@ -87,6 +88,7 @@ export default function RootLayout({ children }) {
         />
 {children}
 <LiveChat />
+<LeadfeederTracker />
 </body>
   </html>
   );
