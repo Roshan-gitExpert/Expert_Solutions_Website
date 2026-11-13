@@ -93,6 +93,28 @@ export default function LiveChat() {
     setGreeting(pickGreeting(keyword, pathname));
     setOpen(true);
 
+    // Tell the team (Telegram group) that a visitor has landed - once
+    // per browser session. See app/api/visitor-alert/route.js. Never
+    // blocks or breaks the page.
+    try {
+      if (!window.sessionStorage.getItem('es_alert_sent')) {
+        window.sessionStorage.setItem('es_alert_sent', '1');
+        fetch('/api/visitor-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: keyword.slice(0, 100),
+            landingPage: window.location.hostname + pathname,
+            adClick: Boolean(gclid),
+            campaign: campaign.slice(0, 100),
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch (e) {
+      // ignore
+    }
+
     // Position the Tawk.to bubble clear of the mobile call bar.
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
