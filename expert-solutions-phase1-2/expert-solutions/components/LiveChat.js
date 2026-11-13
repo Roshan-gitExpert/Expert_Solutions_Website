@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 // ============================================================
@@ -32,6 +32,35 @@ const TAWK_PROPERTY_ID = '6af6ea000846d83c436bbe3d';
 const TAWK_WIDGET_ID = '1k7a84522';
 
 const DISABLED = process.env.NEXT_PUBLIC_LIVECHAT_DISABLED === 'true';
+
+// Layout. The Tawk.to bubble sits bottom-right. If the cookie banner
+// is on screen when the chat loads, the bubble (and our greeting card
+// above it) is lifted just above the banner so it never covers the
+// Accept / Reject / Customise buttons. The banner itself is only
+// MEASURED here - its markup, styling and behaviour are untouched.
+const BUBBLE_SIZE = 60;
+const CARD_GAP = 14;
+const BANNER_GAP = 12;
+const BASE_DESKTOP = 20; // px from bottom edge, desktop
+const BASE_MOBILE = 84; // px from bottom edge, clears the mobile call bar
+const DISMISS_KEY = 'es_chat_card_dismissed';
+
+function cookieBannerHeight() {
+  try {
+    const el = document.querySelector('[role="dialog"][aria-label="Cookie preferences"]');
+    return el ? Math.ceil(el.getBoundingClientRect().height) : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function cardDismissed() {
+  try {
+    return window.sessionStorage.getItem(DISMISS_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
 
 function normalise(value) {
   return String(value || '')
@@ -74,6 +103,15 @@ export default function LiveChat() {
   const pathname = usePathname();
   const [greeting, setGreeting] = useState('');
   const [open, setOpen] = useState(false);
+  const [bubbleBottom, setBubbleBottom] = useState(BASE_DESKTOP);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const skip =
     DISABLED || !pathname || pathname.startsWith('/admin');
@@ -91,7 +129,15 @@ export default function LiveChat() {
     const campaign = params.get('utm_campaign') || '';
 
     setGreeting(pickGreeting(keyword, pathname));
-    setOpen(true);
+
+    // The greeting card appears together with the chat bubble (not
+    // before it), so its arrow always points at something real.
+    const showCard = () => {
+      if (cardDismissed()) return;
+      window.setTimeout(() => {
+        if (mounted.current) setOpen(true);
+      }, 300);
+    };
 
     // Tell the team (Telegram group) that a visitor has landed - once
     // per browser session. See app/api/visitor-alert/route.js. Never
@@ -115,51 +161,78 @@ export default function LiveChat() {
       // ignore
     }
 
-    // Position the Tawk.to bubble clear of the mobile call bar.
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
-    window.Tawk_API.customStyle = {
-      visibility: {
-        desktop: { position: 'br', xOffset: 20, yOffset: 20 },
-        mobile: { position: 'br', xOffset: 12, yOffset: 84 },
-      },
-    };
-    const previousOnLoad = window.Tawk_API.onLoad;
-    window.Tawk_API.onLoad = function onLoad() {
-      try {
-        if (typeof previousOnLoad === 'function') previousOnLoad();
-        window.Tawk_API.setAttributes(
-          {
-            keyword: keyword.slice(0, 100),
-            landingPage: window.location.hostname + pathname,
-            adClick: gclid ? 'yes' : 'no',
-            campaign: campaign.slice(0, 100),
-          },
-          function noop() {}
-        );
-      } catch (e) {
-        // never let chat attributes break the page
-      }
-    };
-
-    if (!window.__esTawkLoaded) {
-      window.__esTawkLoaded = true;
-      try {
-        const s1 = document.createElement('script');
-        const s0 = document.getElementsByTagName('script')[0];
-        s1.async = true;
-        s1.src = `https://embed.tawk.to/${TAWK_PROPERTY_ID}/${TAWK_WIDGET_ID}`;
-        s1.charset = 'UTF-8';
-        s1.setAttribute('crossorigin', '*');
-        s0.parentNode.insertBefore(s1, s0);
-      } catch (e) {
-        // chat is optional - the page works without it
-      }
+    // Already loaded on an earlier page of this visit: just show the card.
+    if (window.__esTawkLoaded) {
+      if (window.__esTawkReady) showCard();
+      return undefined;
     }
+    window.__esTawkLoaded = true;
+
+    // Wait two frames so the cookie banner (if any) has rendered, then
+    // measure it. This costs ~30ms and happens while the alert above
+    // has already been sent.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const bannerH = cookieBannerHeight();
+        const desktopBottom = bannerH ? Math.max(BASE_DESKTOP, bannerH + BANNER_GAP) : BASE_DESKTOP;
+        const mobileBottom = bannerH ? Math.max(BASE_MOBILE, bannerH + BANNER_GAP) : BASE_MOBILE;
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        if (mounted.current) setBubbleBottom(isDesktop ? desktopBottom : mobileBottom);
+
+        window.Tawk_API = window.Tawk_API || {};
+        window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
+        window.Tawk_API.customStyle = {
+          visibility: {
+            desktop: { position: 'br', xOffset: 20, yOffset: desktopBottom },
+            mobile: { position: 'br', xOffset: 12, yOffset: mobileBottom },
+          },
+        };
+        const previousOnLoad = window.Tawk_API.onLoad;
+        window.Tawk_API.onLoad = function onLoad() {
+          try {
+            if (typeof previousOnLoad === 'function') previousOnLoad();
+            window.__esTawkReady = true;
+            window.Tawk_API.setAttributes(
+              {
+                keyword: keyword.slice(0, 100),
+                landingPage: window.location.hostname + pathname,
+                adClick: gclid ? 'yes' : 'no',
+                campaign: campaign.slice(0, 100),
+              },
+              function noop() {}
+            );
+          } catch (e) {
+            // never let chat attributes break the page
+          }
+          showCard();
+        };
+
+        try {
+          const s1 = document.createElement('script');
+          const s0 = document.getElementsByTagName('script')[0];
+          s1.async = true;
+          s1.src = `https://embed.tawk.to/${TAWK_PROPERTY_ID}/${TAWK_WIDGET_ID}`;
+          s1.charset = 'UTF-8';
+          s1.setAttribute('crossorigin', '*');
+          s0.parentNode.insertBefore(s1, s0);
+        } catch (e) {
+          // chat is optional - the page works without it
+        }
+      });
+    });
     return undefined;
   }, [skip, pathname]);
 
   if (skip || !open || !greeting) return null;
+
+  function dismiss() {
+    try {
+      window.sessionStorage.setItem(DISMISS_KEY, '1');
+    } catch (e) {
+      // ignore
+    }
+    setOpen(false);
+  }
 
   function openChat() {
     try {
@@ -169,22 +242,23 @@ export default function LiveChat() {
     } catch (e) {
       // ignore
     }
-    setOpen(false);
+    dismiss();
   }
 
   return (
     <div
       role="dialog"
       aria-label="Chat with our team"
-      className="es-chat-card fixed right-3 z-[55] w-[min(320px,calc(100vw-1.5rem))] rounded-2xl border border-navy-200 bg-white p-4 shadow-2xl bottom-[156px] lg:right-5 lg:bottom-[96px]"
+      style={{ bottom: bubbleBottom + BUBBLE_SIZE + CARD_GAP }}
+      className="es-chat-card fixed right-3 z-[55] w-[min(300px,calc(100vw-1.5rem))] rounded-2xl border border-navy-200 bg-white p-4 shadow-2xl lg:right-5"
     >
       <button
         type="button"
         aria-label="Close chat greeting"
-        onClick={() => setOpen(false)}
+        onClick={dismiss}
         className="absolute right-2 top-2 h-6 w-6 rounded-full text-navy-500 hover:bg-navy-50"
       >
-        {'×'}
+        {'\u00d7'}
       </button>
       <button
         type="button"
@@ -200,6 +274,10 @@ export default function LiveChat() {
       >
         Chat now
       </button>
+      <span
+        aria-hidden="true"
+        className="absolute -bottom-[7px] right-[22px] h-3.5 w-3.5 rotate-45 border-b border-r border-navy-200 bg-white"
+      />
       <style>{`
         @keyframes es-chat-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         .es-chat-card { animation: es-chat-in 0.25s ease-out; }
